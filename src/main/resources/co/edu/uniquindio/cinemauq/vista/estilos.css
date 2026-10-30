@@ -1,0 +1,78 @@
+/* Estilos de CinemaUQ */
+.root {
+    -fx-font-family: "Segoe UI", "Arial";
+    -fx-font-size: 13px;
+    -fx-background-color: #f6f7f9;
+}
+.barra-superior {
+    -fx-background-color: #1f2a44;
+    -fx-padding: 10 16 10 16;
+}
+.barra-superior .label {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+.titulo {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+.subtitulo {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+.ayuda {
+    -fx-text-fill: #5b6475;
+    -fx-font-size: 12px;
+}
+.mensaje-error {
+    -fx-text-fill: #c0392b;
+}
+.tarjeta-login {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #dde1e8;
+    -fx-border-radius: 8;
+    -fx-padding: 28;
+}
+.boton-principal {
+    -fx-background-color: #1f6feb;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.pantalla-cine {
+    -fx-background-color: #cfd6e4;
+    -fx-alignment: center;
+    -fx-padding: 4;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+.asiento {
+    -fx-min-width: 42px;
+    -fx-pref-width: 42px;
+    -fx-font-size: 10px;
+    -fx-background-color: #e3e7ee;
+    -fx-background-radius: 6 6 2 2;
+}
+.asiento-preferencial {
+    -fx-background-color: #f4d06f;
+}
+.asiento-seleccionado {
+    -fx-background-color: #2e9e5b;
+    -fx-text-fill: white;
+}
+.asiento-ocupado {
+    -fx-background-color: #c0392b;
+    -fx-text-fill: white;
+    -fx-opacity: 0.85;
+}
+.fila-asientos {
+    -fx-font-weight: bold;
+    -fx-padding: 0 6 0 0;
+}
+.total {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}

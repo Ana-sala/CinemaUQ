@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="600.0" prefWidth="760.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="co.edu.uniquindio.cinemauq.controlador.RegistroController">
+    <VBox maxWidth="400.0" spacing="10.0" styleClass="tarjeta-login" StackPane.alignment="CENTER">
+        <Label styleClass="titulo" text="Crear cuenta"/>
+        <Label styleClass="ayuda" wrapText="true" text="Al registrarse recibe una tarjeta virtual activa con saldo $0."/>
+        <Label text="Nombre completo"/>
+        <TextField fx:id="txtNombre"/>
+        <Label text="Documento"/>
+        <TextField fx:id="txtDocumento"/>
+        <Label text="Correo"/>
+        <TextField fx:id="txtCorreo"/>
+        <Label text="Contraseña (mínimo 6 caracteres)"/>
+        <PasswordField fx:id="txtContrasena"/>
+        <Label text="Confirmar contraseña"/>
+        <PasswordField fx:id="txtConfirmar"/>
+        <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true"/>
+        <HBox spacing="10.0">
+            <Button defaultButton="true" onAction="#onRegistrar" styleClass="boton-principal" text="Registrarme"/>
+            <Button cancelButton="true" onAction="#onVolver" text="Volver"/>
+        </HBox>
+    </VBox>
+</StackPane>
