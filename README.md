@@ -4,14 +4,6 @@ Sistema integral de gestión de cine · Programación II · Universidad del Quin
 
 **Entrega 1 (parcial 1):** análisis, modelo del dominio, principios SOLID y patrones creacionales.
 
-## Cómo ejecutarlo
-
-Requisitos: JDK 21 e IntelliJ IDEA (o Maven 3.9+). JavaFX 21.0.6 y JUnit 5.12.1 se descargan con Maven.
-
-1. En IntelliJ: **File → Open** y elegir la carpeta `CinemaUQ` (se abre como proyecto Maven).
-2. Ejecutar `src/main/java/co/edu/uniquindio/cinemauq/app/Launcher.java` (Run 'Launcher.main()').
-   - Alternativa por consola: `mvn javafx:run`
-3. Pruebas: clic derecho sobre `src/test/java` → **Run 'All Tests'**, o `mvn test`.
 
 ### Usuarios de prueba
 
