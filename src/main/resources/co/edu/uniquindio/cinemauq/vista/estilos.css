@@ -1,59 +1,78 @@
-/* Estilos de CinemaUQ */
+/* Estilos de CinemaUQ · paleta vino tinto y dorado */
 .root {
     -fx-font-family: "Segoe UI", "Arial";
     -fx-font-size: 13px;
-    -fx-background-color: #f6f7f9;
+    -fx-background-color: #faf7f2;
 }
 .barra-superior {
-    -fx-background-color: #1f2a44;
+    -fx-background-color: #7b1e2b;
     -fx-padding: 10 16 10 16;
+    -fx-border-color: transparent transparent #d4a017 transparent;
+    -fx-border-width: 0 0 3 0;
 }
 .barra-superior .label {
     -fx-text-fill: white;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
+.barra-superior .button {
+    -fx-background-color: #d4a017;
+    -fx-text-fill: #2b1a00;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+}
 .titulo {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1f2a44;
+    -fx-text-fill: #7b1e2b;
 }
 .subtitulo {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1f2a44;
+    -fx-text-fill: #7b1e2b;
 }
 .ayuda {
-    -fx-text-fill: #5b6475;
+    -fx-text-fill: #6b5b5e;
     -fx-font-size: 12px;
 }
 .mensaje-error {
-    -fx-text-fill: #c0392b;
+    -fx-text-fill: #b3261e;
 }
 .tarjeta-login {
     -fx-background-color: white;
     -fx-background-radius: 8;
-    -fx-border-color: #dde1e8;
+    -fx-border-color: #d4a017;
     -fx-border-radius: 8;
+    -fx-border-width: 2;
     -fx-padding: 28;
 }
 .boton-principal {
-    -fx-background-color: #1f6feb;
-    -fx-text-fill: white;
+    -fx-background-color: #d4a017;
+    -fx-text-fill: #2b1a00;
     -fx-font-weight: bold;
+    -fx-background-radius: 6;
+}
+.boton-principal:hover {
+    -fx-background-color: #e6b422;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: #7b1e2b;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
 }
 .pantalla-cine {
-    -fx-background-color: #cfd6e4;
+    -fx-background-color: #7b1e2b;
     -fx-alignment: center;
     -fx-padding: 4;
     -fx-font-weight: bold;
-    -fx-text-fill: #1f2a44;
+    -fx-text-fill: #f4d06f;
 }
 .asiento {
     -fx-min-width: 42px;
     -fx-pref-width: 42px;
     -fx-font-size: 10px;
-    -fx-background-color: #e3e7ee;
+    -fx-background-color: #e8e1d9;
     -fx-background-radius: 6 6 2 2;
 }
 .asiento-preferencial {
@@ -64,15 +83,17 @@
     -fx-text-fill: white;
 }
 .asiento-ocupado {
-    -fx-background-color: #c0392b;
+    -fx-background-color: #5f6368;
     -fx-text-fill: white;
     -fx-opacity: 0.85;
 }
 .fila-asientos {
     -fx-font-weight: bold;
+    -fx-text-fill: #7b1e2b;
     -fx-padding: 0 6 0 0;
 }
 .total {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
+    -fx-text-fill: #7b1e2b;
 }
