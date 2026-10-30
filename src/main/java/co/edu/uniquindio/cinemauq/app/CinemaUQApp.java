@@ -4,7 +4,6 @@ import co.edu.uniquindio.cinemauq.contexto.CinemaUQ;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-/** Aplicación JavaFX. Arranca en la pantalla de inicio de sesión. */
 public class CinemaUQApp extends Application {
 
     @Override
