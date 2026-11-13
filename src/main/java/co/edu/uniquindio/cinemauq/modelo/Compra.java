@@ -1,6 +1,8 @@
 package co.edu.uniquindio.cinemauq.modelo;
 
-import co.edu.uniquindio.cinemauq.excepciones.ReembolsoDuplicadoException;
+import co.edu.uniquindio.cinemauq.estado.EstadoDeCompra;
+import co.edu.uniquindio.cinemauq.estado.EstadoPendiente;
+import co.edu.uniquindio.cinemauq.excepciones.CinemaUQException;
 import co.edu.uniquindio.cinemauq.modelo.enums.EstadoCompra;
 import co.edu.uniquindio.cinemauq.util.Formato;
 
@@ -13,6 +15,7 @@ import java.util.List;
  * Compra de un cliente para una función: entradas + confitería.
  * Se arma paso a paso con CompraBuilder (patrón Builder) y nace PENDIENTE;
  * ServicioCompras la cobra (PAGADA) o la cancela (CANCELADA).
+ * PATRÓN STATE · contexto: delega en su EstadoDeCompra qué operaciones se permiten.
  */
 public class Compra implements Identificable {
 
@@ -25,7 +28,7 @@ public class Compra implements Identificable {
     private final double valorAPagar;
     private final List<String> detallePrecio;
     private LocalDateTime fecha;
-    private EstadoCompra estado = EstadoCompra.PENDIENTE;
+    private EstadoDeCompra estado = EstadoPendiente.INSTANCIA;   // State
     private int puntosGanados;
     private double valorPagado;
     private Reembolso reembolso;
@@ -61,21 +64,28 @@ public class Compra implements Identificable {
         return detallePrecio;
     }
 
+    /** Pregunta al estado si se puede pagar, sin cambiar nada (se usa antes de cobrar). */
+    public void verificarPago() throws CinemaUQException {
+        estado.pagar(this);
+    }
+
+    /** Pregunta al estado si se puede cancelar, sin cambiar nada (se usa antes de reembolsar). */
+    public void verificarCancelacion() throws CinemaUQException {
+        estado.cancelar(this);
+    }
+
     /** Congela lo que realmente se cobró: los reembolsos se calculan sobre este valor. */
-    public void marcarPagada(LocalDateTime fechaPago, double valorPagado, int puntosGanados) {
+    public void marcarPagada(LocalDateTime fechaPago, double valorPagado, int puntosGanados) throws CinemaUQException {
+        this.estado = estado.pagar(this);          // el estado decide si se puede y cuál sigue
         this.fecha = fechaPago;
         this.valorPagado = valorPagado;
         this.puntosGanados = puntosGanados;
-        this.estado = EstadoCompra.PAGADA;
     }
 
-    /** Un reembolso no puede ejecutarse dos veces sobre la misma operación (RN-04). */
-    public void registrarReembolso(Reembolso reembolso) throws ReembolsoDuplicadoException {
-        if (this.reembolso != null) {
-            throw new ReembolsoDuplicadoException("La compra " + id + " ya fue reembolsada.");
-        }
+    /** Un reembolso no puede ejecutarse dos veces sobre la misma operación (RN-04): lo impide el estado. */
+    public void registrarReembolso(Reembolso reembolso) throws CinemaUQException {
+        this.estado = estado.cancelar(this);
         this.reembolso = reembolso;
-        this.estado = EstadoCompra.CANCELADA;
     }
 
     public boolean isReembolsada() {
@@ -119,7 +129,12 @@ public class Compra implements Identificable {
         return fecha;
     }
 
+    /** Estado para mostrar (enum). El comportamiento lo da getEstadoActual(). */
     public EstadoCompra getEstado() {
+        return estado.tipo();
+    }
+
+    public EstadoDeCompra getEstadoActual() {
         return estado;
     }
 
@@ -131,10 +146,10 @@ public class Compra implements Identificable {
     public String toString() {
         String sillas = String.join(", ", entradas.stream().map(e -> e.getAsiento().getCodigo()).toList());
         String texto = id + " · " + funcion.getPelicula().getTitulo() + " · " + Formato.fechaHora(funcion.getFechaHora())
-                + " · sillas " + (sillas.isEmpty() ? "-" : sillas) + " · " + Formato.moneda(estado == EstadoCompra.PENDIENTE ? getValorAPagar() : valorPagado);
+                + " · sillas " + (sillas.isEmpty() ? "-" : sillas) + " · " + Formato.moneda(getEstado() == EstadoCompra.PENDIENTE ? getValorAPagar() : valorPagado);
         if (puntosRedimidos > 0) {
             texto += " + " + puntosRedimidos + " pts";
         }
-        return texto + " · " + estado + (reembolso != null ? " (reembolso " + reembolso.getPorcentaje() + "%)" : "");
+        return texto + " · " + getEstado() + (reembolso != null ? " (reembolso " + reembolso.getPorcentaje() + "%)" : "");
     }
 }

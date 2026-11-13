@@ -7,7 +7,6 @@ import co.edu.uniquindio.cinemauq.excepciones.CinemaUQException;
 import co.edu.uniquindio.cinemauq.excepciones.DatosInvalidosException;
 import co.edu.uniquindio.cinemauq.excepciones.FuncionNoDisponibleException;
 import co.edu.uniquindio.cinemauq.excepciones.OperacionNoAutorizadaException;
-import co.edu.uniquindio.cinemauq.excepciones.ReembolsoDuplicadoException;
 import co.edu.uniquindio.cinemauq.fabrica.CatalogoFabricasEntrada;
 import co.edu.uniquindio.cinemauq.modelo.Cliente;
 import co.edu.uniquindio.cinemauq.modelo.Compra;
@@ -78,9 +77,7 @@ public class ServicioCompras {
         Cliente cliente = compra.getCliente();
         Funcion funcion = compra.getFuncion();
 
-        if (compra.getEstado() != EstadoCompra.PENDIENTE) {
-            throw new DatosInvalidosException("La compra " + compra.getId() + " ya fue procesada.");
-        }
+        compra.verificarPago();                       // State: una compra pagada o cancelada no se cobra
         if (!funcion.admiteVentas(ahora)) {
             throw new FuncionNoDisponibleException("La función ya inició o fue cancelada.");
         }
@@ -126,9 +123,6 @@ public class ServicioCompras {
         if (!compra.getCliente().equals(solicitante)) {
             throw new OperacionNoAutorizadaException("Solo el dueño de la compra puede cancelarla.");
         }
-        if (compra.getEstado() != EstadoCompra.PAGADA) {
-            throw new CancelacionNoPermitidaException("Solo se cancelan compras pagadas; esta está " + compra.getEstado() + ".");
-        }
         return reembolsar(compra, politicaCliente);
     }
 
@@ -161,16 +155,14 @@ public class ServicioCompras {
 
     /** Aplica la estrategia recibida: el método no cambia aunque se agreguen políticas nuevas. */
     private Reembolso reembolsar(Compra compra, PoliticaReembolso politica) throws CinemaUQException {
-        if (compra.isReembolsada()) {
-            throw new ReembolsoDuplicadoException("La compra " + compra.getId() + " ya fue reembolsada.");
-        }
+        compra.verificarCancelacion();                // State: pendiente o ya cancelada → excepción
         LocalDateTime ahora = reloj.ahora();
         int porcentaje = politica.porcentajeReembolso(compra.getFuncion().getFechaHora(), ahora);
         MotivoReembolso motivo = politica.motivo();
         Cliente cliente = compra.getCliente();
         double valor = Math.round(compra.getValorPagado() * porcentaje / 100.0);
         Reembolso reembolso = new Reembolso(compra.getId(), ahora, porcentaje, valor, compra.getPuntosRedimidos(), motivo);
-        compra.registrarReembolso(reembolso);            // marca la operación: no se puede repetir
+        compra.registrarReembolso(reembolso);         // el estado pasa a CANCELADA: no se puede repetir
         if (valor > 0) {
             cliente.getTarjeta().acreditar(TipoMovimiento.REEMBOLSO, valor,
                     "Reembolso " + porcentaje + "% compra " + compra.getId(), ahora);

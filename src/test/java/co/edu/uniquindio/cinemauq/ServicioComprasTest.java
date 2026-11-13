@@ -55,7 +55,8 @@ class ServicioComprasTest {
         assertEquals(100_000, e.cliente.getTarjeta().getSaldo());
         assertTrue(e.funcion.estaDisponible(e.silla("A1")));                     // sillas liberadas
         assertEquals(0, e.cliente.getCuentaPuntos().getDisponibles(Escenario.AHORA.toLocalDate())); // puntos anulados
-        assertThrows(CancelacionNoPermitidaException.class, () -> e.servicioCompras.cancelarCompra(e.cliente, compra));
+        // State: la compra quedó CANCELADA, un segundo reembolso se rechaza (RN-04)
+        assertThrows(ReembolsoDuplicadoException.class, () -> e.servicioCompras.cancelarCompra(e.cliente, compra));
     }
 
     @Test
