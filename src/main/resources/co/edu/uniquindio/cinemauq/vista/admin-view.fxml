@@ -6,6 +6,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
@@ -29,146 +30,156 @@
         <TabPane tabClosingPolicy="UNAVAILABLE">
             <!-- ============ Clientes y recargas ============ -->
             <Tab text="Clientes y recargas">
-                <HBox spacing="14.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <VBox prefWidth="380.0" spacing="8.0">
-                        <Label styleClass="subtitulo" text="Clientes"/>
-                        <ListView fx:id="lstClientes" VBox.vgrow="ALWAYS"/>
-                        <Label styleClass="subtitulo" text="Solicitudes de recarga pendientes"/>
-                        <ListView fx:id="lstSolicitudes" prefHeight="140.0"/>
-                        <HBox spacing="8.0">
-                            <Button onAction="#onAprobarSolicitud" styleClass="boton-principal" text="Aprobar"/>
-                            <Button onAction="#onRechazarSolicitud" text="Rechazar"/>
-                        </HBox>
-                    </VBox>
-                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label fx:id="lblDetalleCliente" styleClass="subtitulo" wrapText="true"/>
-                        <HBox alignment="CENTER_LEFT" spacing="8.0">
-                            <TextField fx:id="txtValorRecarga" prefWidth="160.0" promptText="Valor a recargar"/>
-                            <Button onAction="#onRecargar" styleClass="boton-principal" text="Recargar tarjeta"/>
-                            <Button onAction="#onBloquearTarjeta" text="Bloquear tarjeta"/>
-                            <Button onAction="#onActivarTarjeta" text="Activar tarjeta"/>
-                        </HBox>
-                        <Label styleClass="subtitulo" text="Movimientos de la tarjeta"/>
-                        <ListView fx:id="lstMovimientosCliente" VBox.vgrow="ALWAYS"/>
-                        <Label styleClass="subtitulo" text="Compras del cliente"/>
-                        <ListView fx:id="lstComprasCliente" VBox.vgrow="ALWAYS"/>
-                    </VBox>
-                </HBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true">
+                    <HBox minHeight="620.0" spacing="14.0">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                        </padding>
+                        <VBox prefWidth="380.0" spacing="8.0">
+                            <Label styleClass="subtitulo" text="Clientes"/>
+                            <ListView fx:id="lstClientes" VBox.vgrow="ALWAYS"/>
+                            <Label styleClass="subtitulo" text="Solicitudes de recarga pendientes"/>
+                            <ListView fx:id="lstSolicitudes" prefHeight="140.0"/>
+                            <HBox spacing="8.0">
+                                <Button onAction="#onAprobarSolicitud" styleClass="boton-principal" text="Aprobar"/>
+                                <Button onAction="#onRechazarSolicitud" text="Rechazar"/>
+                            </HBox>
+                        </VBox>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <Label fx:id="lblDetalleCliente" styleClass="subtitulo" wrapText="true"/>
+                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                <TextField fx:id="txtValorRecarga" prefWidth="160.0" promptText="Valor a recargar"/>
+                                <Button onAction="#onRecargar" styleClass="boton-principal" text="Recargar tarjeta"/>
+                                <Button onAction="#onBloquearTarjeta" text="Bloquear tarjeta"/>
+                                <Button onAction="#onActivarTarjeta" text="Activar tarjeta"/>
+                            </HBox>
+                            <Label styleClass="subtitulo" text="Movimientos de la tarjeta"/>
+                            <ListView fx:id="lstMovimientosCliente" VBox.vgrow="ALWAYS"/>
+                            <Label styleClass="subtitulo" text="Compras del cliente"/>
+                            <ListView fx:id="lstComprasCliente" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+                    </HBox>
+                </ScrollPane>
             </Tab>
             <!-- ============ Funciones ============ -->
             <Tab text="Funciones">
-                <HBox spacing="14.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label styleClass="subtitulo" text="Funciones programadas"/>
-                        <ListView fx:id="lstFuncionesAdmin" VBox.vgrow="ALWAYS"/>
-                        <HBox spacing="8.0">
-                            <Button onAction="#onDuplicarFuncion" text="Duplicar a la fecha y hora del formulario"/>
-                            <Button onAction="#onCancelarFuncion" text="Cancelar función (reembolso 100 %)"/>
-                        </HBox>
-                    </VBox>
-                    <VBox prefWidth="320.0" spacing="8.0">
-                        <Label styleClass="subtitulo" text="Programar función"/>
-                        <ComboBox fx:id="cmbPelicula" maxWidth="Infinity" promptText="Película"/>
-                        <ComboBox fx:id="cmbSala" maxWidth="Infinity" promptText="Sala"/>
-                        <DatePicker fx:id="dpFecha" maxWidth="Infinity"/>
-                        <TextField fx:id="txtHora" promptText="Hora HH:mm, ej. 19:30"/>
-                        <TextField fx:id="txtPrecio" promptText="Precio base, ej. 14000"/>
-                        <Button maxWidth="Infinity" onAction="#onProgramarFuncion" styleClass="boton-principal" text="Programar"/>
-                        <Label styleClass="ayuda" wrapText="true"
-                               text="El sistema no permite cruces en una sala: cada función reserva su duración más 20 minutos de limpieza."/>
-                        <Label styleClass="subtitulo" text="Registrar sala"/>
-                        <TextField fx:id="txtNombreSala" promptText="Nombre, ej. Sala 4"/>
-                        <ComboBox fx:id="cmbTipoSala" maxWidth="Infinity" promptText="Tipo de sala"/>
-                        <HBox spacing="6.0">
-                            <TextField fx:id="txtFilas" promptText="Filas"/>
-                            <TextField fx:id="txtSillasFila" promptText="Sillas por fila"/>
-                            <TextField fx:id="txtFilasPreferenciales" promptText="Filas pref."/>
-                        </HBox>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarSala" text="Registrar sala"/>
-                    </VBox>
-                </HBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true">
+                    <HBox minHeight="620.0" spacing="14.0">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                        </padding>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="subtitulo" text="Funciones programadas"/>
+                            <ListView fx:id="lstFuncionesAdmin" VBox.vgrow="ALWAYS"/>
+                            <HBox spacing="8.0">
+                                <Button onAction="#onDuplicarFuncion" text="Duplicar a la fecha y hora del formulario"/>
+                                <Button onAction="#onCancelarFuncion" text="Cancelar función (reembolso 100 %)"/>
+                            </HBox>
+                        </VBox>
+                        <VBox prefWidth="320.0" spacing="8.0">
+                            <Label styleClass="subtitulo" text="Programar función"/>
+                            <ComboBox fx:id="cmbPelicula" maxWidth="Infinity" promptText="Película"/>
+                            <ComboBox fx:id="cmbSala" maxWidth="Infinity" promptText="Sala"/>
+                            <DatePicker fx:id="dpFecha" maxWidth="Infinity"/>
+                            <TextField fx:id="txtHora" promptText="Hora HH:mm, ej. 19:30"/>
+                            <TextField fx:id="txtPrecio" promptText="Precio base, ej. 14000"/>
+                            <Button maxWidth="Infinity" onAction="#onProgramarFuncion" styleClass="boton-principal" text="Programar"/>
+                            <Label styleClass="ayuda" wrapText="true"
+                                   text="El sistema no permite cruces en una sala: cada función reserva su duración más 20 minutos de limpieza."/>
+                            <Label styleClass="subtitulo" text="Registrar sala"/>
+                            <TextField fx:id="txtNombreSala" promptText="Nombre, ej. Sala 4"/>
+                            <ComboBox fx:id="cmbTipoSala" maxWidth="Infinity" promptText="Tipo de sala"/>
+                            <HBox spacing="6.0">
+                                <TextField fx:id="txtFilas" promptText="Filas"/>
+                                <TextField fx:id="txtSillasFila" promptText="Sillas por fila"/>
+                                <TextField fx:id="txtFilasPreferenciales" promptText="Filas pref."/>
+                            </HBox>
+                            <Button maxWidth="Infinity" onAction="#onRegistrarSala" text="Registrar sala"/>
+                        </VBox>
+                    </HBox>
+                </ScrollPane>
             </Tab>
             <!-- ============ Películas ============ -->
             <Tab text="Películas">
-                <HBox spacing="14.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label styleClass="subtitulo" text="Películas"/>
-                        <ListView fx:id="lstPeliculasAdmin" VBox.vgrow="ALWAYS"/>
-                        <Button onAction="#onCambiarCartelera" text="Poner / quitar de cartelera"/>
-                    </VBox>
-                    <VBox prefWidth="320.0" spacing="8.0">
-                        <Label styleClass="subtitulo" text="Registrar película"/>
-                        <TextField fx:id="txtTitulo" promptText="Título"/>
-                        <ComboBox fx:id="cmbGenero" maxWidth="Infinity" promptText="Género"/>
-                        <ComboBox fx:id="cmbClasificacion" maxWidth="Infinity" promptText="Clasificación"/>
-                        <TextField fx:id="txtDuracion" promptText="Duración en minutos"/>
-                        <TextArea fx:id="txtSinopsis" prefHeight="110.0" promptText="Sinopsis" wrapText="true"/>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarPelicula" styleClass="boton-principal" text="Registrar como nueva"/>
-                        <Button maxWidth="Infinity" onAction="#onActualizarPelicula" text="Guardar cambios a la seleccionada"/>
-                    </VBox>
-                </HBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true">
+                    <HBox minHeight="620.0" spacing="14.0">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                        </padding>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="subtitulo" text="Películas"/>
+                            <ListView fx:id="lstPeliculasAdmin" VBox.vgrow="ALWAYS"/>
+                            <Button onAction="#onCambiarCartelera" text="Poner / quitar de cartelera"/>
+                        </VBox>
+                        <VBox prefWidth="320.0" spacing="8.0">
+                            <Label styleClass="subtitulo" text="Registrar película"/>
+                            <TextField fx:id="txtTitulo" promptText="Título"/>
+                            <ComboBox fx:id="cmbGenero" maxWidth="Infinity" promptText="Género"/>
+                            <ComboBox fx:id="cmbClasificacion" maxWidth="Infinity" promptText="Clasificación"/>
+                            <TextField fx:id="txtDuracion" promptText="Duración en minutos"/>
+                            <TextArea fx:id="txtSinopsis" prefHeight="110.0" promptText="Sinopsis" wrapText="true"/>
+                            <Button maxWidth="Infinity" onAction="#onRegistrarPelicula" styleClass="boton-principal" text="Registrar como nueva"/>
+                            <Button maxWidth="Infinity" onAction="#onActualizarPelicula" text="Guardar cambios a la seleccionada"/>
+                        </VBox>
+                    </HBox>
+                </ScrollPane>
             </Tab>
             <!-- ============ Confitería y promociones ============ -->
             <Tab text="Confitería y promociones">
-                <HBox spacing="14.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label styleClass="subtitulo" text="Productos y combos (Ctrl + clic para elegir varios)"/>
-                        <ListView fx:id="lstItems" VBox.vgrow="ALWAYS"/>
-                        <Label styleClass="subtitulo" text="Estructura del ítem seleccionado"/>
-                        <TextArea fx:id="txtDetalleItem" editable="false" prefHeight="150.0"/>
-                    </VBox>
-                    <VBox prefWidth="330.0" spacing="8.0">
-                        <Label styleClass="subtitulo" text="Registrar producto"/>
-                        <TextField fx:id="txtNombreProducto" promptText="Nombre"/>
-                        <TextField fx:id="txtPrecioProducto" promptText="Precio, ej. 9000"/>
-                        <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Categoría"/>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarProducto" styleClass="boton-principal" text="Registrar producto"/>
-                        <Label styleClass="subtitulo" text="Crear combo con lo seleccionado"/>
-                        <TextField fx:id="txtNombreCombo" promptText="Nombre del combo"/>
-                        <TextField fx:id="txtDescuentoCombo" promptText="Descuento %, de 0 a 50"/>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarCombo" styleClass="boton-principal" text="Crear combo"/>
-                        <Label styleClass="ayuda" wrapText="true" text="Un combo puede incluir productos y también otros combos."/>
-                    </VBox>
-                    <VBox prefWidth="360.0" spacing="8.0">
-                        <Label styleClass="subtitulo" text="Promociones"/>
-                        <ListView fx:id="lstPromociones" VBox.vgrow="ALWAYS"/>
-                        <Button maxWidth="Infinity" onAction="#onCambiarEstadoPromocion" text="Activar / desactivar"/>
-                        <TextField fx:id="txtNombrePromo" promptText="Nombre de la promoción"/>
-                        <HBox spacing="6.0">
-                            <TextField fx:id="txtPorcentajePromo" promptText="Descuento (%)"/>
-                            <ComboBox fx:id="cmbAlcance" promptText="Aplica a"/>
-                        </HBox>
-                        <ComboBox fx:id="cmbDiaPromo" maxWidth="Infinity"/>
-                        <HBox spacing="6.0">
-                            <DatePicker fx:id="dpInicioPromo" promptText="Desde"/>
-                            <DatePicker fx:id="dpFinPromo" promptText="Hasta"/>
-                        </HBox>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarPromocion" styleClass="boton-principal" text="Registrar promoción"/>
-                    </VBox>
-                </HBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true">
+                    <HBox minHeight="620.0" spacing="14.0">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                        </padding>
+                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="subtitulo" text="Productos y combos (Ctrl + clic para elegir varios)"/>
+                            <ListView fx:id="lstItems" VBox.vgrow="ALWAYS"/>
+                            <Label styleClass="subtitulo" text="Estructura del ítem seleccionado"/>
+                            <TextArea fx:id="txtDetalleItem" editable="false" prefHeight="150.0"/>
+                        </VBox>
+                        <VBox prefWidth="330.0" spacing="8.0">
+                            <Label styleClass="subtitulo" text="Registrar producto"/>
+                            <TextField fx:id="txtNombreProducto" promptText="Nombre"/>
+                            <TextField fx:id="txtPrecioProducto" promptText="Precio, ej. 9000"/>
+                            <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Categoría"/>
+                            <Button maxWidth="Infinity" onAction="#onRegistrarProducto" styleClass="boton-principal" text="Registrar producto"/>
+                            <Label styleClass="subtitulo" text="Crear combo con lo seleccionado"/>
+                            <TextField fx:id="txtNombreCombo" promptText="Nombre del combo"/>
+                            <TextField fx:id="txtDescuentoCombo" promptText="Descuento %, de 0 a 50"/>
+                            <Button maxWidth="Infinity" onAction="#onRegistrarCombo" styleClass="boton-principal" text="Crear combo"/>
+                            <Label styleClass="ayuda" wrapText="true" text="Un combo puede incluir productos y también otros combos."/>
+                        </VBox>
+                        <VBox prefWidth="360.0" spacing="8.0">
+                            <Label styleClass="subtitulo" text="Promociones"/>
+                            <ListView fx:id="lstPromociones" VBox.vgrow="ALWAYS"/>
+                            <Button maxWidth="Infinity" onAction="#onCambiarEstadoPromocion" text="Activar / desactivar"/>
+                            <TextField fx:id="txtNombrePromo" promptText="Nombre de la promoción"/>
+                            <HBox spacing="6.0">
+                                <TextField fx:id="txtPorcentajePromo" promptText="Descuento (%)"/>
+                                <ComboBox fx:id="cmbAlcance" promptText="Aplica a"/>
+                            </HBox>
+                            <ComboBox fx:id="cmbDiaPromo" maxWidth="Infinity"/>
+                            <HBox spacing="6.0">
+                                <DatePicker fx:id="dpInicioPromo" promptText="Desde"/>
+                                <DatePicker fx:id="dpFinPromo" promptText="Hasta"/>
+                            </HBox>
+                            <Button maxWidth="Infinity" onAction="#onRegistrarPromocion" styleClass="boton-principal" text="Registrar promoción"/>
+                        </VBox>
+                    </HBox>
+                </ScrollPane>
             </Tab>
             <!-- ============ Auditoría ============ -->
             <Tab text="Auditoría">
-                <VBox spacing="8.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <Label styleClass="subtitulo" text="Operaciones de administración sobre la cartelera (registradas por el proxy)"/>
-                    <Button onAction="#onActualizarAuditoria" text="Actualizar"/>
-                    <ListView fx:id="lstAuditoria" VBox.vgrow="ALWAYS"/>
-                </VBox>
+                <ScrollPane fitToWidth="true" fitToHeight="true">
+                    <VBox minHeight="620.0" spacing="8.0">
+                        <padding>
+                            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                        </padding>
+                        <Label styleClass="subtitulo" text="Operaciones de administración sobre la cartelera (registradas por el proxy)"/>
+                        <Button onAction="#onActualizarAuditoria" text="Actualizar"/>
+                        <ListView fx:id="lstAuditoria" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                </ScrollPane>
             </Tab>
             <!-- ============ Reportes y estadísticas (vista y controlador propios) ============ -->
             <Tab text="Reportes y estadísticas">
