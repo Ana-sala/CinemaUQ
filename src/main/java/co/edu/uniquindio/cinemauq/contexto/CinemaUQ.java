@@ -14,6 +14,7 @@ import co.edu.uniquindio.cinemauq.modelo.Usuario;
 import co.edu.uniquindio.cinemauq.observador.MonitorOcupacion;
 import co.edu.uniquindio.cinemauq.observador.NotificadorCliente;
 import co.edu.uniquindio.cinemauq.proxy.Auditoria;
+import co.edu.uniquindio.cinemauq.reporte.ServicioReportes;
 import co.edu.uniquindio.cinemauq.proxy.GestionCarteleraProxy;
 import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
 import co.edu.uniquindio.cinemauq.repositorio.RepositorioMemoria;
@@ -53,6 +54,7 @@ public final class CinemaUQ {
     private final ServicioPuntos puntos;
     private final ServicioEstadisticas estadisticas;
     private final ServicioPromociones promociones;
+    private final ServicioReportes reportes;
     private final TaquillaFacade taquilla;
     private final Auditoria auditoria = new Auditoria();
     private final GestionCartelera gestionCartelera;
@@ -82,7 +84,8 @@ public final class CinemaUQ {
                 equivalencia, new PoliticaPorAnticipacion(), new PoliticaReembolsoTotal(),   // Strategy
                 this.promociones, reloj);
         puntos = new ServicioPuntos(equivalencia, reloj);
-        estadisticas = new ServicioEstadisticas(repoCompras::listar, funciones::listar);
+        estadisticas = new ServicioEstadisticas(repoCompras::listar, funciones::listar, autenticacion::listarClientes);
+        reportes = new ServicioReportes(estadisticas, reloj);
         taquilla = new TaquillaFacade(compras, puntos);                                   // Facade
         gestionCartelera = new GestionCarteleraProxy(cartelera, sesion, auditoria, reloj); // Proxy
         compras.agregarObservador(notificador);                                           // Observer
@@ -129,6 +132,10 @@ public final class CinemaUQ {
 
     public ServicioEstadisticas getEstadisticas() {
         return estadisticas;
+    }
+
+    public ServicioReportes getReportes() {
+        return reportes;
     }
 
     public ServicioPromociones getPromociones() {
