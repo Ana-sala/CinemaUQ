@@ -12,10 +12,7 @@ estadísticas por periodo, reportes exportables (.txt y .pdf), gráficos JavaFX 
 
 Cada entrega tiene su etiqueta en el repositorio: `entrega-1`, `entrega-2` y `entrega-3`.
 
-## Cómo ejecutar
 
-- JDK 21 o superior y Maven. En IntelliJ: recargar Maven y ejecutar `co.edu.uniquindio.cinemauq.app.Launcher`.
-- Terminal: `mvn javafx:run` para la aplicación y `mvn test` para las pruebas.
 
 ### Usuarios de prueba
 
