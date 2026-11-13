@@ -7,6 +7,7 @@ import co.edu.uniquindio.cinemauq.excepciones.DatosInvalidosException;
 import co.edu.uniquindio.cinemauq.fachada.Cotizacion;
 import co.edu.uniquindio.cinemauq.fachada.PedidoConfiteria;
 import co.edu.uniquindio.cinemauq.fachada.TaquillaFacade;
+import co.edu.uniquindio.cinemauq.observador.Notificacion;
 import co.edu.uniquindio.cinemauq.modelo.AcumulacionPuntos;
 import co.edu.uniquindio.cinemauq.modelo.Asiento;
 import co.edu.uniquindio.cinemauq.modelo.Cliente;
@@ -104,6 +105,9 @@ public class ClienteController {
     private ListView<AcumulacionPuntos> lstAcumulaciones;
     @FXML
     private Label lblEquivalencia;
+    // --- Notificaciones (Observer) ---
+    @FXML
+    private ListView<Notificacion> lstNotificaciones;
 
     @FXML
     private void initialize() {
@@ -295,6 +299,12 @@ public class ClienteController {
     private void refrescarCompras() {
         lstCompras.setItems(FXCollections.observableArrayList(taquilla.historial(cliente)));
         txtDetalleCompra.clear();
+        refrescarNotificaciones();
+    }
+
+    /** Los avisos los genera NotificadorCliente, un observador suscrito a ServicioCompras. */
+    private void refrescarNotificaciones() {
+        lstNotificaciones.setItems(FXCollections.observableArrayList(cine.getNotificador().notificacionesDe(cliente)));
     }
 
     private void mostrarDetalle(Compra compra) {

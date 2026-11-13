@@ -11,6 +11,8 @@ import co.edu.uniquindio.cinemauq.modelo.Promocion;
 import co.edu.uniquindio.cinemauq.modelo.Sala;
 import co.edu.uniquindio.cinemauq.modelo.SolicitudRecarga;
 import co.edu.uniquindio.cinemauq.modelo.Usuario;
+import co.edu.uniquindio.cinemauq.observador.MonitorOcupacion;
+import co.edu.uniquindio.cinemauq.observador.NotificadorCliente;
 import co.edu.uniquindio.cinemauq.proxy.Auditoria;
 import co.edu.uniquindio.cinemauq.proxy.GestionCarteleraProxy;
 import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
@@ -54,6 +56,8 @@ public final class CinemaUQ {
     private final TaquillaFacade taquilla;
     private final Auditoria auditoria = new Auditoria();
     private final GestionCartelera gestionCartelera;
+    private final NotificadorCliente notificador = new NotificadorCliente();          // Observer
+    private final MonitorOcupacion monitorOcupacion = new MonitorOcupacion(80);       // Observer
     private final Reloj reloj;
 
     /** Constructor privado: nadie fuera de la clase puede hacer new CinemaUQ(). */
@@ -81,6 +85,8 @@ public final class CinemaUQ {
         estadisticas = new ServicioEstadisticas(repoCompras::listar, funciones::listar);
         taquilla = new TaquillaFacade(compras, puntos);                                   // Facade
         gestionCartelera = new GestionCarteleraProxy(cartelera, sesion, auditoria, reloj); // Proxy
+        compras.agregarObservador(notificador);                                           // Observer
+        compras.agregarObservador(monitorOcupacion);
 
         DatosIniciales.cargar(this);
     }
@@ -137,6 +143,16 @@ public final class CinemaUQ {
     /** Gestión de cartelera protegida por el Proxy (lo que usa la pantalla del administrador). */
     public GestionCartelera getGestionCartelera() {
         return gestionCartelera;
+    }
+
+    /** Avisos de compras para cada cliente (Observer). */
+    public NotificadorCliente getNotificador() {
+        return notificador;
+    }
+
+    /** Alertas de funciones con más del 80 % de ocupación (Observer). */
+    public MonitorOcupacion getMonitorOcupacion() {
+        return monitorOcupacion;
     }
 
     public Auditoria getAuditoria() {

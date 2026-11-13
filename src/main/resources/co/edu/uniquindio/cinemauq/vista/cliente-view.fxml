@@ -121,6 +121,16 @@
                     <ListView fx:id="lstAcumulaciones" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </Tab>
+
+            <Tab text="Notificaciones">
+                <VBox spacing="10.0">
+                    <padding>
+                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                    </padding>
+                    <Label styleClass="subtitulo" text="Avisos de sus compras y cancelaciones (los más recientes primero)"/>
+                    <ListView fx:id="lstNotificaciones" VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </Tab>
         </TabPane>
     </center>
 </BorderPane>

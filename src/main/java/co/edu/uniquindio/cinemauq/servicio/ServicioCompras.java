@@ -19,6 +19,7 @@ import co.edu.uniquindio.cinemauq.modelo.enums.EstadoCompra;
 import co.edu.uniquindio.cinemauq.modelo.enums.MotivoReembolso;
 import co.edu.uniquindio.cinemauq.modelo.enums.Rol;
 import co.edu.uniquindio.cinemauq.modelo.enums.TipoMovimiento;
+import co.edu.uniquindio.cinemauq.observador.ObservadorCompras;
 import co.edu.uniquindio.cinemauq.precio.FuentePromociones;
 import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
 import co.edu.uniquindio.cinemauq.util.Reloj;
@@ -33,6 +34,8 @@ import java.util.List;
  * Orquesta la compra, el pago, la cancelación y el reembolso (RF-007, RF-008, RF-012, RF-014, RF-021).
  * No sabe calcular puntos ni porcentajes: se los pide a sus colaboradores, que recibe
  * por el constructor como abstracciones (DIP).
+ * STRATEGY · contexto de las políticas de reembolso.
+ * OBSERVER · sujeto: avisa a los observadores suscritos cuando una compra se paga o se cancela.
  */
 public class ServicioCompras {
 
@@ -44,6 +47,7 @@ public class ServicioCompras {
     private final PoliticaReembolso politicaCine;      // Strategy: cuando el cine cancela la función
     private final FuentePromociones promociones;
     private final Reloj reloj;
+    private final List<ObservadorCompras> observadores = new ArrayList<>();   // Observer
 
     public ServicioCompras(Repositorio<Compra> compras, CatalogoFabricasEntrada fabricas,
                            ReglaAcumulacionPuntos reglaPuntos, EquivalenciaPuntos equivalencia,
@@ -57,6 +61,30 @@ public class ServicioCompras {
         this.politicaCine = politicaCine;
         this.promociones = promociones;
         this.reloj = reloj;
+    }
+
+    // ===================== Observer: suscripción =====================
+
+    public void agregarObservador(ObservadorCompras observador) {
+        if (!observadores.contains(observador)) {
+            observadores.add(observador);
+        }
+    }
+
+    public void quitarObservador(ObservadorCompras observador) {
+        observadores.remove(observador);
+    }
+
+    private void notificarPago(Compra compra) {
+        for (ObservadorCompras o : List.copyOf(observadores)) {
+            o.compraPagada(compra);
+        }
+    }
+
+    private void notificarCancelacion(Compra compra, Reembolso reembolso) {
+        for (ObservadorCompras o : List.copyOf(observadores)) {
+            o.compraCancelada(compra, reembolso);
+        }
     }
 
     /** Punto de partida de una compra: entrega el Builder para que la pantalla la arme. */
@@ -115,6 +143,7 @@ public class ServicioCompras {
         compra.marcarPagada(ahora, valor, ganados);
         compras.guardar(compra);
         cliente.agregarCompra(compra);
+        notificarPago(compra);                         // Observer
         return compra;
     }
 
@@ -175,6 +204,7 @@ public class ServicioCompras {
             cliente.getCuentaPuntos().acumular(compra.getPuntosRedimidos(), ahora.toLocalDate(),
                     "Devolución de puntos " + compra.getId());
         }
+        notificarCancelacion(compra, reembolso);       // Observer
         return reembolso;
     }
 
