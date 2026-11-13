@@ -5,26 +5,39 @@
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane prefHeight="560.0" prefWidth="760.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<!-- Tarjeta horizontal y centrada: a la izquierda la presentación y los usuarios de prueba, a la derecha el formulario. -->
+<StackPane prefHeight="560.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="co.edu.uniquindio.cinemauq.controlador.LoginController">
-    <VBox maxWidth="380.0" spacing="12.0" styleClass="tarjeta-login" StackPane.alignment="CENTER">
-        <Label styleClass="titulo" text="CinemaUQ"/>
-        <Label styleClass="ayuda" text="Cartelera, entradas y confitería en un solo lugar."/>
-        <Label text="Correo"/>
-        <TextField fx:id="txtCorreo" promptText="correo@ejemplo.com"/>
-        <Label text="Contraseña"/>
-        <PasswordField fx:id="txtContrasena" onAction="#onIngresar" promptText="Contraseña"/>
-        <Button defaultButton="true" maxWidth="Infinity" onAction="#onIngresar" styleClass="boton-principal" text="Ingresar"/>
-        <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true"/>
-        <Hyperlink onAction="#onIrARegistro" text="¿No tiene cuenta? Regístrese"/>
-        <Label styleClass="ayuda" wrapText="true"
-               text="Usuarios de prueba: admin@cinemauq.com / admin123 · laura@correo.com / 123456 · carlos@correo.com / 123456 · sofia@correo.com / 123456 (tarjeta bloqueada)"/>
-        <padding>
-            <Insets bottom="28.0" left="28.0" right="28.0" top="28.0"/>
-        </padding>
-    </VBox>
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0"/>
+    </padding>
+    <HBox maxHeight="-Infinity" maxWidth="820.0" spacing="28.0" styleClass="tarjeta-login" StackPane.alignment="CENTER">
+        <VBox prefWidth="340.0" spacing="10.0" HBox.hgrow="ALWAYS">
+            <Label styleClass="titulo" text="CinemaUQ"/>
+            <Label styleClass="ayuda" wrapText="true" text="Cartelera, entradas y confitería en un solo lugar."/>
+            <Separator/>
+            <Label styleClass="subtitulo" text="Usuarios de prueba"/>
+            <Label styleClass="ayuda" text="admin@cinemauq.com / admin123 (administrador)"/>
+            <Label styleClass="ayuda" text="laura@correo.com / 123456"/>
+            <Label styleClass="ayuda" text="carlos@correo.com / 123456"/>
+            <Label styleClass="ayuda" text="sofia@correo.com / 123456 (tarjeta bloqueada)"/>
+        </VBox>
+        <Separator orientation="VERTICAL"/>
+        <VBox minWidth="320.0" prefWidth="360.0" spacing="12.0" HBox.hgrow="ALWAYS">
+            <Label styleClass="subtitulo" text="Iniciar sesión"/>
+            <Label text="Correo"/>
+            <TextField fx:id="txtCorreo" promptText="correo@ejemplo.com"/>
+            <Label text="Contraseña"/>
+            <PasswordField fx:id="txtContrasena" onAction="#onIngresar" promptText="Contraseña"/>
+            <Button defaultButton="true" maxWidth="Infinity" onAction="#onIngresar" styleClass="boton-principal" text="Ingresar"/>
+            <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true"/>
+            <Hyperlink onAction="#onIrARegistro" text="¿No tiene cuenta? Regístrese"/>
+        </VBox>
+    </HBox>
 </StackPane>

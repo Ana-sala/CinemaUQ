@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane prefHeight="600.0" prefWidth="760.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<!-- Misma tarjeta centrada que el inicio de sesión, con los campos en dos columnas. -->
+<StackPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="co.edu.uniquindio.cinemauq.controlador.RegistroController">
-    <VBox maxWidth="400.0" spacing="10.0" styleClass="tarjeta-login" StackPane.alignment="CENTER">
+    <padding>
+        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0"/>
+    </padding>
+    <VBox maxHeight="-Infinity" maxWidth="760.0" spacing="12.0" styleClass="tarjeta-login" StackPane.alignment="CENTER">
         <Label styleClass="titulo" text="Crear cuenta"/>
         <Label styleClass="ayuda" wrapText="true" text="Al registrarse recibe una tarjeta virtual activa con saldo $0."/>
-        <Label text="Nombre completo"/>
-        <TextField fx:id="txtNombre"/>
-        <Label text="Documento"/>
-        <TextField fx:id="txtDocumento"/>
-        <Label text="Correo"/>
-        <TextField fx:id="txtCorreo"/>
-        <Label text="Contraseña (mínimo 6 caracteres)"/>
-        <PasswordField fx:id="txtContrasena"/>
-        <Label text="Confirmar contraseña"/>
-        <PasswordField fx:id="txtConfirmar"/>
+        <GridPane hgap="20.0" vgap="6.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0"/>
+            </columnConstraints>
+            <Label text="Nombre completo" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="txtNombre" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Label text="Documento" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <TextField fx:id="txtDocumento" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Correo" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2"/>
+            <TextField fx:id="txtCorreo" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2"/>
+            <Label text="Contraseña (mínimo 6 caracteres)" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <PasswordField fx:id="txtContrasena" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <Label text="Confirmar contraseña" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <PasswordField fx:id="txtConfirmar" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+        </GridPane>
         <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true"/>
         <HBox spacing="10.0">
             <Button defaultButton="true" onAction="#onRegistrar" styleClass="boton-principal" text="Registrarme"/>
