@@ -8,9 +8,11 @@ import co.edu.uniquindio.cinemauq.modelo.Asiento;
 import co.edu.uniquindio.cinemauq.modelo.Cliente;
 import co.edu.uniquindio.cinemauq.modelo.Combo;
 import co.edu.uniquindio.cinemauq.modelo.Funcion;
+import co.edu.uniquindio.cinemauq.modelo.ItemConfiteria;
 import co.edu.uniquindio.cinemauq.modelo.Pelicula;
 import co.edu.uniquindio.cinemauq.modelo.Producto;
 import co.edu.uniquindio.cinemauq.modelo.Sala;
+import co.edu.uniquindio.cinemauq.modelo.enums.AlcancePromocion;
 import co.edu.uniquindio.cinemauq.modelo.enums.CategoriaProducto;
 import co.edu.uniquindio.cinemauq.modelo.enums.Clasificacion;
 import co.edu.uniquindio.cinemauq.modelo.enums.Genero;
@@ -20,6 +22,7 @@ import co.edu.uniquindio.cinemauq.servicio.ServicioCompras;
 import co.edu.uniquindio.cinemauq.servicio.ServicioConfiteria;
 import co.edu.uniquindio.cinemauq.servicio.ServicioTarjeta;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -130,9 +133,14 @@ public final class DatosIniciales {
         Combo individual = confiteria.registrarCombo("Combo Individual", 10, List.of(crispetasM, gaseosa));
         Combo pareja = confiteria.registrarCombo("Combo Pareja", 10, List.of(crispetasG, gaseosa, gaseosa));
         confiteria.registrarCombo("Combo Familiar", 15, List.of(crispetasG, crispetasG, gaseosa, gaseosa, gaseosa, gaseosa, nachos));
+        // Composite: un combo que contiene otro combo
+        confiteria.registrarCombo("Combo Mega Pareja", 5, List.<ItemConfiteria>of(pareja, nachos));
 
-        confiteria.registrarPromocion("Martes de cine 2x1", 50, hoy, hoy.plusMonths(2));
-        confiteria.registrarPromocion("Estudiante UQ -20% en combos", 20, hoy, hoy.plusMonths(6));
+        // Decorator: estas promociones se apilan sobre el precio de la compra
+        cine.getPromociones().registrarPromocion("Martes de cine", 50, AlcancePromocion.ENTRADAS, DayOfWeek.TUESDAY,
+                hoy, hoy.plusMonths(3));
+        cine.getPromociones().registrarPromocion("Confitería UQ", 15, AlcancePromocion.CONFITERIA, null,
+                hoy, hoy.plusMonths(3));
 
         // ---------- Compras de ejemplo (pasan por el Builder y el pago real) ----------
         pagar(compras, compras.nuevaCompra(laura, ecosD1)

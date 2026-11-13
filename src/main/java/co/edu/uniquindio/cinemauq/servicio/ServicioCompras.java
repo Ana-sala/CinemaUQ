@@ -20,6 +20,7 @@ import co.edu.uniquindio.cinemauq.modelo.enums.EstadoCompra;
 import co.edu.uniquindio.cinemauq.modelo.enums.MotivoReembolso;
 import co.edu.uniquindio.cinemauq.modelo.enums.Rol;
 import co.edu.uniquindio.cinemauq.modelo.enums.TipoMovimiento;
+import co.edu.uniquindio.cinemauq.precio.FuentePromociones;
 import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
 import co.edu.uniquindio.cinemauq.util.Reloj;
 
@@ -41,16 +42,18 @@ public class ServicioCompras {
     private final ReglaAcumulacionPuntos reglaPuntos;
     private final EquivalenciaPuntos equivalencia;
     private final PoliticaCancelacion politica;
+    private final FuentePromociones promociones;
     private final Reloj reloj;
 
     public ServicioCompras(Repositorio<Compra> compras, CatalogoFabricasEntrada fabricas,
                            ReglaAcumulacionPuntos reglaPuntos, EquivalenciaPuntos equivalencia,
-                           PoliticaCancelacion politica, Reloj reloj) {
+                           PoliticaCancelacion politica, FuentePromociones promociones, Reloj reloj) {
         this.compras = compras;
         this.fabricas = fabricas;
         this.reglaPuntos = reglaPuntos;
         this.equivalencia = equivalencia;
         this.politica = politica;
+        this.promociones = promociones;
         this.reloj = reloj;
     }
 
@@ -59,7 +62,7 @@ public class ServicioCompras {
         if (!funcion.admiteVentas(reloj.ahora())) {
             throw new FuncionNoDisponibleException("La función ya inició o fue cancelada.");
         }
-        return new CompraBuilder(cliente, funcion, fabricas, equivalencia);
+        return new CompraBuilder(cliente, funcion, fabricas, equivalencia, promociones);
     }
 
     /**

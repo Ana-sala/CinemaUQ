@@ -3,7 +3,7 @@ package co.edu.uniquindio.cinemauq.modelo;
 import co.edu.uniquindio.cinemauq.modelo.enums.CategoriaProducto;
 import co.edu.uniquindio.cinemauq.util.Formato;
 
-/** Producto suelto de confitería. */
+/** COMPOSITE · Leaf: producto suelto de confitería, no contiene a otros. */
 public class Producto implements ItemConfiteria {
 
     private final String id;
@@ -53,6 +53,16 @@ public class Producto implements ItemConfiteria {
 
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
+    }
+
+    @Override
+    public int contarProductos() {
+        return 1;
+    }
+
+    @Override
+    public String describir(String sangria) {
+        return sangria + "- " + nombre + " " + Formato.moneda(precio) + "\n";
     }
 
     @Override

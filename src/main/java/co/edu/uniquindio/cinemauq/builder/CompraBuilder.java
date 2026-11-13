@@ -10,6 +10,9 @@ import co.edu.uniquindio.cinemauq.modelo.Entrada;
 import co.edu.uniquindio.cinemauq.modelo.Funcion;
 import co.edu.uniquindio.cinemauq.modelo.ItemConfiteria;
 import co.edu.uniquindio.cinemauq.modelo.LineaConfiteria;
+import co.edu.uniquindio.cinemauq.precio.CalculadoraPrecio;
+import co.edu.uniquindio.cinemauq.precio.FuentePromociones;
+import co.edu.uniquindio.cinemauq.precio.PrecioBase;
 import co.edu.uniquindio.cinemauq.servicio.EquivalenciaPuntos;
 import co.edu.uniquindio.cinemauq.util.GeneradorId;
 
@@ -30,15 +33,17 @@ public class CompraBuilder {
     private final Funcion funcion;
     private final CatalogoFabricasEntrada fabricas;
     private final EquivalenciaPuntos equivalencia;
+    private final FuentePromociones promociones;
     private final List<Entrada> entradas = new ArrayList<>();
     private final List<LineaConfiteria> lineas = new ArrayList<>();
 
     public CompraBuilder(Cliente cliente, Funcion funcion, CatalogoFabricasEntrada fabricas,
-                         EquivalenciaPuntos equivalencia) {
+                         EquivalenciaPuntos equivalencia, FuentePromociones promociones) {
         this.cliente = cliente;
         this.funcion = funcion;
         this.fabricas = fabricas;
         this.equivalencia = equivalencia;
+        this.promociones = promociones;
     }
 
     public CompraBuilder agregarEntrada(Asiento asiento) throws AsientoNoDisponibleException, DatosInvalidosException {
@@ -95,9 +100,13 @@ public class CompraBuilder {
         return puntos;
     }
 
+    /** Precio base envuelto con los decoradores de las promociones que aplican a la función. */
+    public CalculadoraPrecio getCalculadora() {
+        return promociones.aplicar(new PrecioBase(entradas, lineas), funcion);
+    }
+
     public double getValorAPagar() {
-        return entradas.stream().filter(e -> !e.isPagadaConPuntos()).mapToDouble(Entrada::getPrecio).sum()
-                + lineas.stream().filter(l -> !l.isPagadaConPuntos()).mapToDouble(LineaConfiteria::getSubtotal).sum();
+        return getCalculadora().getTotal();
     }
 
     public List<Entrada> getEntradas() {
@@ -112,6 +121,8 @@ public class CompraBuilder {
         if (entradas.isEmpty() && lineas.isEmpty()) {
             throw new DatosInvalidosException("La compra debe tener al menos una entrada o un producto.");
         }
-        return new Compra(GeneradorId.siguiente("CMP"), cliente, funcion, entradas, lineas, getPuntosNecesarios());
+        CalculadoraPrecio precio = getCalculadora();
+        return new Compra(GeneradorId.siguiente("CMP"), cliente, funcion, entradas, lineas, getPuntosNecesarios(),
+                precio.getTotal(), precio.getDetalle());
     }
 }

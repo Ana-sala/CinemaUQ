@@ -55,6 +55,26 @@ public class ServicioCartelera implements ConsultaCartelera, GestionCartelera {
     @Override
     public Pelicula registrarPelicula(String titulo, Genero genero, Clasificacion clasificacion, int duracionMinutos,
                                       String sinopsis) throws DatosInvalidosException {
+        validarPelicula(titulo, genero, clasificacion, duracionMinutos);
+        Pelicula pelicula = new Pelicula(GeneradorId.siguiente("PEL"), titulo.trim(), genero, clasificacion,
+                duracionMinutos, sinopsis == null ? "" : sinopsis.trim());
+        peliculas.guardar(pelicula);
+        return pelicula;
+    }
+
+    @Override
+    public void actualizarPelicula(Pelicula pelicula, String titulo, Genero genero, Clasificacion clasificacion,
+                                   int duracionMinutos, String sinopsis) throws DatosInvalidosException {
+        validarPelicula(titulo, genero, clasificacion, duracionMinutos);
+        pelicula.setTitulo(titulo.trim());
+        pelicula.setGenero(genero);
+        pelicula.setClasificacion(clasificacion);
+        pelicula.setDuracionMinutos(duracionMinutos);
+        pelicula.setSinopsis(sinopsis == null ? "" : sinopsis.trim());
+    }
+
+    private void validarPelicula(String titulo, Genero genero, Clasificacion clasificacion, int duracionMinutos)
+            throws DatosInvalidosException {
         if (titulo == null || titulo.isBlank()) {
             throw new DatosInvalidosException("El título es obligatorio.");
         }
@@ -64,10 +84,6 @@ public class ServicioCartelera implements ConsultaCartelera, GestionCartelera {
         if (duracionMinutos < 30 || duracionMinutos > 300) {
             throw new DatosInvalidosException("La duración debe estar entre 30 y 300 minutos.");
         }
-        Pelicula pelicula = new Pelicula(GeneradorId.siguiente("PEL"), titulo.trim(), genero, clasificacion,
-                duracionMinutos, sinopsis == null ? "" : sinopsis.trim());
-        peliculas.guardar(pelicula);
-        return pelicula;
     }
 
     @Override

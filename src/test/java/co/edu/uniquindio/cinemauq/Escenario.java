@@ -24,10 +24,11 @@ class Escenario {
     final ServicioAutenticacion autenticacion = new ServicioAutenticacion(usuarios);
     final ServicioCartelera cartelera = new ServicioCartelera(new RepositorioMemoria<>(), new RepositorioMemoria<>(),
             funciones, reloj);
-    final ServicioConfiteria confiteria = new ServicioConfiteria(new RepositorioMemoria<>(), new RepositorioMemoria<>());
+    final ServicioConfiteria confiteria = new ServicioConfiteria(new RepositorioMemoria<>());
+    final ServicioPromociones promociones = new ServicioPromociones(new RepositorioMemoria<>());
     final ServicioTarjeta tarjetas = new ServicioTarjeta(new RepositorioMemoria<>(), reloj);
     final ServicioCompras servicioCompras = new ServicioCompras(compras, new CatalogoFabricasEntrada(),
-            new ReglaPorValorGastado(1000), new EquivalenciaPuntos(100), new PoliticaCancelacion(), reloj);
+            new ReglaPorValorGastado(1000), new EquivalenciaPuntos(100), new PoliticaCancelacion(), promociones, reloj);
 
     final Administrador admin;
     final Cliente cliente;
