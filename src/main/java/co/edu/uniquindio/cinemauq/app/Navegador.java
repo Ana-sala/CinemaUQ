@@ -36,6 +36,7 @@ public final class Navegador {
             ventana.setScene(escena);
             ventana.setTitle("CinemaUQ · " + titulo);
             ventana.centerOnScreen();
+            ventana.setMaximized(true);
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo abrir la vista " + fxml, e);
         }

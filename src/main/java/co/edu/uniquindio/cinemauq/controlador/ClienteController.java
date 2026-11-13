@@ -1,18 +1,18 @@
 package co.edu.uniquindio.cinemauq.controlador;
 
 import co.edu.uniquindio.cinemauq.app.Navegador;
-import co.edu.uniquindio.cinemauq.builder.CompraBuilder;
 import co.edu.uniquindio.cinemauq.contexto.CinemaUQ;
 import co.edu.uniquindio.cinemauq.excepciones.CinemaUQException;
 import co.edu.uniquindio.cinemauq.excepciones.DatosInvalidosException;
+import co.edu.uniquindio.cinemauq.fachada.Cotizacion;
+import co.edu.uniquindio.cinemauq.fachada.PedidoConfiteria;
+import co.edu.uniquindio.cinemauq.fachada.TaquillaFacade;
 import co.edu.uniquindio.cinemauq.modelo.AcumulacionPuntos;
 import co.edu.uniquindio.cinemauq.modelo.Asiento;
 import co.edu.uniquindio.cinemauq.modelo.Cliente;
 import co.edu.uniquindio.cinemauq.modelo.Compra;
-import co.edu.uniquindio.cinemauq.modelo.Entrada;
 import co.edu.uniquindio.cinemauq.modelo.Funcion;
 import co.edu.uniquindio.cinemauq.modelo.ItemConfiteria;
-import co.edu.uniquindio.cinemauq.modelo.LineaConfiteria;
 import co.edu.uniquindio.cinemauq.modelo.Movimiento;
 import co.edu.uniquindio.cinemauq.modelo.Pelicula;
 import co.edu.uniquindio.cinemauq.modelo.Reembolso;
@@ -43,20 +43,18 @@ import java.util.Set;
 
 /**
  * Pantalla del cliente: cartelera, selección gráfica de sillas, confitería, compra,
- * tarjeta, historial y puntos. El controlador solo traduce clics a llamadas de servicio (MVC).
+ * tarjeta, historial y puntos. El controlador solo traduce clics a llamadas (MVC):
+ * para comprar habla únicamente con la fachada TaquillaFacade.
  */
 public class ClienteController {
 
-    /** Lo que el cliente va agregando de confitería antes de comprar. */
-    private record SeleccionConfiteria(ItemConfiteria item, int cantidad, boolean conPuntos) {
-    }
-
     private final CinemaUQ cine = CinemaUQ.getInstance();
     private final ConsultaCartelera cartelera = cine.getCartelera();   // ISP: solo consulta
+    private final TaquillaFacade taquilla = cine.getTaquilla();        // Facade: cotizar, comprar, cancelar
     private Cliente cliente;
     private Funcion funcionActual;
     private final Set<Asiento> seleccionados = new LinkedHashSet<>();
-    private final List<SeleccionConfiteria> confiteria = new ArrayList<>();
+    private final List<PedidoConfiteria> confiteria = new ArrayList<>();
 
     @FXML
     private Label lblBienvenida;
@@ -148,10 +146,13 @@ public class ClienteController {
         actualizarResumen();
     }
 
-    /** RF-005: mapa de la sala. Gris = libre, dorado = preferencial, verde = elegida, rojo = vendida. */
+    /** RF-005: mapa de la sala. Claro = libre, dorado = preferencial, verde = elegida, gris oscuro = vendida. */
     private void dibujarAsientos() {
         gridAsientos.getChildren().clear();
         if (funcionActual == null) {
+            Label aviso = new Label("Elija una película y una función para ver la sala.");
+            aviso.getStyleClass().add("ayuda");
+            gridAsientos.add(aviso, 0, 0);
             return;
         }
         Sala sala = funcionActual.getSala();
@@ -195,7 +196,7 @@ public class ClienteController {
             Dialogos.error("Seleccione un producto o combo.");
             return;
         }
-        confiteria.add(new SeleccionConfiteria(item, spnCantidad.getValue(), chkConfiteriaConPuntos.isSelected()));
+        confiteria.add(new PedidoConfiteria(item, spnCantidad.getValue(), chkConfiteriaConPuntos.isSelected()));
         actualizarResumen();
     }
 
@@ -208,26 +209,7 @@ public class ClienteController {
         actualizarResumen();
     }
 
-    /** Arma la compra con el Builder a partir de lo elegido en pantalla. */
-    private CompraBuilder construirCompra() throws CinemaUQException {
-        CompraBuilder builder = cine.getCompras().nuevaCompra(cliente, funcionActual);
-        for (Asiento asiento : seleccionados) {
-            if (chkEntradasConPuntos.isSelected()) {
-                builder.agregarEntradaConPuntos(asiento);
-            } else {
-                builder.agregarEntrada(asiento);
-            }
-        }
-        for (SeleccionConfiteria s : confiteria) {
-            if (s.conPuntos()) {
-                builder.agregarConfiteriaConPuntos(s.item(), s.cantidad());
-            } else {
-                builder.agregarConfiteria(s.item(), s.cantidad());
-            }
-        }
-        return builder;
-    }
-
+    /** Pide a la fachada el resumen: ítems, subtotales, promociones aplicadas y total. */
     private void actualizarResumen() {
         lstResumen.getItems().clear();
         if (funcionActual == null) {
@@ -235,21 +217,21 @@ public class ClienteController {
             return;
         }
         try {
-            CompraBuilder builder = construirCompra();
-            for (Entrada entrada : builder.getEntradas()) {
-                lstResumen.getItems().add(entrada.toString());
+            Cotizacion cotizacion = taquilla.cotizar(cliente, funcionActual, seleccionados,
+                    chkEntradasConPuntos.isSelected(), confiteria);
+            lstResumen.getItems().addAll(cotizacion.items());
+            if (!cotizacion.items().isEmpty()) {
+                lstResumen.getItems().add("──────────");
+                lstResumen.getItems().addAll(cotizacion.detallePrecio());
             }
-            for (LineaConfiteria linea : builder.getLineas()) {
-                lstResumen.getItems().add(linea.toString());
-            }
-            lblTotal.setText("A pagar: " + Formato.moneda(builder.getValorAPagar()) + "   ·   Puntos a usar: "
-                    + builder.getPuntosNecesarios() + " de " + cine.getPuntos().disponibles(cliente) + " disponibles");
+            lblTotal.setText("A pagar: " + Formato.moneda(cotizacion.total()) + "   ·   Puntos a usar: "
+                    + cotizacion.puntosNecesarios() + " de " + cotizacion.puntosDisponibles() + " disponibles");
         } catch (CinemaUQException e) {
             lblTotal.setText(e.getMessage());
         }
     }
 
-    /** RF-007, RF-008 y RF-014: confirma, paga con la tarjeta y redime puntos si se marcaron. */
+    /** RF-007, RF-008 y RF-014: confirma y compra a través de la fachada. */
     @FXML
     private void onComprar() {
         if (funcionActual == null) {
@@ -257,16 +239,20 @@ public class ClienteController {
             return;
         }
         try {
-            Compra compra = construirCompra().build();
+            Cotizacion cotizacion = taquilla.cotizar(cliente, funcionActual, seleccionados,
+                    chkEntradasConPuntos.isSelected(), confiteria);
             String mensaje = "Película: " + funcionActual.getPelicula().getTitulo() + "\nFunción: " + funcionActual
-                    + "\nTotal a pagar con la tarjeta: " + Formato.moneda(compra.getValorAPagar())
-                    + (compra.getPuntosRedimidos() > 0 ? "\nPuntos a redimir: " + compra.getPuntosRedimidos() : "");
+                    + "\n\n" + String.join("\n", cotizacion.detallePrecio())
+                    + "\n\nTotal a pagar con la tarjeta: " + Formato.moneda(cotizacion.total())
+                    + (cotizacion.puntosNecesarios() > 0 ? "\nPuntos a redimir: " + cotizacion.puntosNecesarios() : "");
             if (!Dialogos.confirmar("¿Confirmar la compra?", mensaje)) {
                 return;
             }
-            cine.getCompras().pagar(compra);
-            Dialogos.info("Compra exitosa", "Compra " + compra.getId() + " pagada.\nGanó " + compra.getPuntosGanados()
-                    + " puntos. Saldo actual: " + Formato.moneda(cliente.getTarjeta().getSaldo()));
+            Compra compra = taquilla.comprar(cliente, funcionActual, seleccionados, chkEntradasConPuntos.isSelected(),
+                    confiteria);
+            Dialogos.info("Compra exitosa", "Compra " + compra.getId() + " pagada por " + Formato.moneda(compra.getValorPagado())
+                    + ".\nGanó " + compra.getPuntosGanados() + " puntos. Saldo actual: "
+                    + Formato.moneda(cliente.getTarjeta().getSaldo()));
             confiteria.clear();
             seleccionados.clear();
             lstFunciones.refresh();
@@ -307,7 +293,7 @@ public class ClienteController {
     // ===================== Compras =====================
 
     private void refrescarCompras() {
-        lstCompras.setItems(FXCollections.observableArrayList(cine.getCompras().historialDe(cliente)));
+        lstCompras.setItems(FXCollections.observableArrayList(taquilla.historial(cliente)));
         txtDetalleCompra.clear();
     }
 
@@ -319,6 +305,8 @@ public class ClienteController {
         sb.append(compra.getFuncion().getPelicula().getTitulo()).append('\n').append(compra.getFuncion()).append("\n\n");
         compra.getEntradas().forEach(e -> sb.append("  ").append(e).append('\n'));
         compra.getLineas().forEach(l -> sb.append("  ").append(l).append('\n'));
+        sb.append('\n');
+        compra.getDetallePrecio().forEach(d -> sb.append("  ").append(d).append('\n'));
         sb.append("\nPagado: ").append(Formato.moneda(compra.getValorPagado()))
                 .append("\nPuntos redimidos: ").append(compra.getPuntosRedimidos())
                 .append("\nPuntos ganados: ").append(compra.getPuntosGanados())
@@ -344,7 +332,7 @@ public class ClienteController {
             return;
         }
         try {
-            Reembolso reembolso = cine.getCompras().cancelarCompra(cliente, compra);
+            Reembolso reembolso = taquilla.cancelar(cliente, compra);
             Dialogos.info("Compra cancelada", "Se devolvieron " + Formato.moneda(reembolso.getValor()) + " ("
                     + reembolso.getPorcentaje() + "%) a su tarjeta virtual.");
             refrescarTarjeta();

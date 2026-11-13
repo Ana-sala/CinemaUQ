@@ -11,13 +11,16 @@ import co.edu.uniquindio.cinemauq.modelo.ItemConfiteria;
 import co.edu.uniquindio.cinemauq.modelo.Movimiento;
 import co.edu.uniquindio.cinemauq.modelo.Pelicula;
 import co.edu.uniquindio.cinemauq.modelo.Promocion;
+import co.edu.uniquindio.cinemauq.modelo.RegistroAuditoria;
 import co.edu.uniquindio.cinemauq.modelo.Reembolso;
 import co.edu.uniquindio.cinemauq.modelo.Sala;
 import co.edu.uniquindio.cinemauq.modelo.SolicitudRecarga;
 import co.edu.uniquindio.cinemauq.modelo.Usuario;
+import co.edu.uniquindio.cinemauq.modelo.enums.AlcancePromocion;
 import co.edu.uniquindio.cinemauq.modelo.enums.CategoriaProducto;
 import co.edu.uniquindio.cinemauq.modelo.enums.Clasificacion;
 import co.edu.uniquindio.cinemauq.modelo.enums.Genero;
+import co.edu.uniquindio.cinemauq.modelo.enums.TipoSala;
 import co.edu.uniquindio.cinemauq.servicio.GestionCartelera;
 import co.edu.uniquindio.cinemauq.util.Formato;
 import javafx.collections.FXCollections;
@@ -26,22 +29,29 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-/** Pantalla del administrador: clientes y recargas, funciones, películas, confitería y estadísticas. */
+/**
+ * Pantalla del administrador: clientes y recargas, funciones y salas, películas, confitería
+ * y promociones, auditoría y estadísticas. Las operaciones de cartelera pasan por el Proxy.
+ */
 public class AdminController {
 
     private final CinemaUQ cine = CinemaUQ.getInstance();
-    private final GestionCartelera cartelera = cine.getCartelera();     // ISP: interfaz de gestión
+    private final GestionCartelera cartelera = cine.getGestionCartelera(); // Proxy: protege y registra
     private Usuario admin;
 
     @FXML
@@ -72,6 +82,16 @@ public class AdminController {
     private TextField txtHora;
     @FXML
     private TextField txtPrecio;
+    @FXML
+    private TextField txtNombreSala;
+    @FXML
+    private ComboBox<TipoSala> cmbTipoSala;
+    @FXML
+    private TextField txtFilas;
+    @FXML
+    private TextField txtSillasFila;
+    @FXML
+    private TextField txtFilasPreferenciales;
     // --- Películas ---
     @FXML
     private ListView<Pelicula> lstPeliculasAdmin;
@@ -96,6 +116,27 @@ public class AdminController {
     private TextField txtPrecioProducto;
     @FXML
     private ComboBox<CategoriaProducto> cmbCategoria;
+    @FXML
+    private TextArea txtDetalleItem;
+    @FXML
+    private TextField txtNombreCombo;
+    @FXML
+    private TextField txtDescuentoCombo;
+    @FXML
+    private TextField txtNombrePromo;
+    @FXML
+    private TextField txtPorcentajePromo;
+    @FXML
+    private ComboBox<AlcancePromocion> cmbAlcance;
+    @FXML
+    private ComboBox<String> cmbDiaPromo;
+    @FXML
+    private DatePicker dpInicioPromo;
+    @FXML
+    private DatePicker dpFinPromo;
+    // --- Auditoría ---
+    @FXML
+    private ListView<RegistroAuditoria> lstAuditoria;
     // --- Estadísticas ---
     @FXML
     private TextArea txtEstadisticas;
@@ -110,12 +151,33 @@ public class AdminController {
         cmbClasificacion.setItems(FXCollections.observableArrayList(Clasificacion.values()));
         cmbCategoria.setItems(FXCollections.observableArrayList(CategoriaProducto.values()));
         dpFecha.setValue(LocalDate.now().plusDays(1));
+        cmbTipoSala.setItems(FXCollections.observableArrayList(TipoSala.values()));
+        cmbAlcance.setItems(FXCollections.observableArrayList(AlcancePromocion.values()));
+        cmbDiaPromo.getItems().add(TODOS_LOS_DIAS);
+        for (DayOfWeek dia : DayOfWeek.values()) {
+            cmbDiaPromo.getItems().add(nombreDia(dia));
+        }
+        cmbDiaPromo.setValue(TODOS_LOS_DIAS);
+        dpInicioPromo.setValue(LocalDate.now());
+        dpFinPromo.setValue(LocalDate.now().plusMonths(1));
+        lstItems.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        lstItems.getSelectionModel().selectedItemProperty().addListener((obs, antes, item) ->
+                txtDetalleItem.setText(item == null ? "" : item.describir("")));
+        lstPeliculasAdmin.getSelectionModel().selectedItemProperty().addListener((obs, antes, pelicula) -> llenarPelicula(pelicula));
 
         refrescarClientes();
         refrescarFunciones();
         refrescarPeliculas();
         refrescarConfiteria();
         onActualizarEstadisticas();
+        refrescarAuditoria();
+    }
+
+    private static final String TODOS_LOS_DIAS = "Todos los días";
+
+    private static String nombreDia(DayOfWeek dia) {
+        String nombre = dia.getDisplayName(TextStyle.FULL, Locale.of("es", "CO"));
+        return nombre.substring(0, 1).toUpperCase() + nombre.substring(1);
     }
 
     // ===================== Clientes, tarjetas y recargas =====================
@@ -242,6 +304,7 @@ public class AdminController {
         } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
+        refrescarAuditoria();
     }
 
     /** RF-017 con Prototype: copia la función seleccionada a la fecha y hora del formulario. */
@@ -259,6 +322,7 @@ public class AdminController {
         } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
+        refrescarAuditoria();
     }
 
     /** RF-021: cancelar la función y devolver el 100 % a todos sus compradores. */
@@ -283,6 +347,29 @@ public class AdminController {
         } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
+    }
+
+    /** RF-016: registrar sala; sus sillas se crean con ella. */
+    @FXML
+    private void onRegistrarSala() {
+        try {
+            int filas = (int) ClienteController.leerValor(txtFilas.getText());
+            int sillas = (int) ClienteController.leerValor(txtSillasFila.getText());
+            String pref = txtFilasPreferenciales.getText();
+            int preferenciales = pref == null || pref.isBlank() ? 0 : (int) ClienteController.leerValor(pref);
+            if (cmbTipoSala.getValue() == null || txtNombreSala.getText().isBlank()) {
+                throw new DatosInvalidosException("Escriba el nombre y elija el tipo de sala.");
+            }
+            cartelera.registrarSala(txtNombreSala.getText().trim(), cmbTipoSala.getValue(), filas, sillas, preferenciales);
+            txtNombreSala.clear();
+            txtFilas.clear();
+            txtSillasFila.clear();
+            txtFilasPreferenciales.clear();
+            refrescarFunciones();
+        } catch (CinemaUQException e) {
+            Dialogos.error(e.getMessage());
+        }
+        refrescarAuditoria();
     }
 
     private LocalDateTime leerFechaHora() throws DatosInvalidosException {
@@ -317,6 +404,38 @@ public class AdminController {
         } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
+        refrescarAuditoria();
+    }
+
+    private void llenarPelicula(Pelicula pelicula) {
+        if (pelicula == null) {
+            return;
+        }
+        txtTitulo.setText(pelicula.getTitulo());
+        cmbGenero.setValue(pelicula.getGenero());
+        cmbClasificacion.setValue(pelicula.getClasificacion());
+        txtDuracion.setText(String.valueOf(pelicula.getDuracionMinutos()));
+        txtSinopsis.setText(pelicula.getSinopsis());
+    }
+
+    /** RF-015: editar la película seleccionada con los datos del formulario. */
+    @FXML
+    private void onActualizarPelicula() {
+        Pelicula pelicula = lstPeliculasAdmin.getSelectionModel().getSelectedItem();
+        if (pelicula == null) {
+            Dialogos.error("Seleccione la película que desea editar.");
+            return;
+        }
+        try {
+            int duracion = (int) ClienteController.leerValor(txtDuracion.getText());
+            cartelera.actualizarPelicula(pelicula, txtTitulo.getText(), cmbGenero.getValue(), cmbClasificacion.getValue(),
+                    duracion, txtSinopsis.getText());
+            lstPeliculasAdmin.refresh();
+            refrescarFunciones();
+        } catch (CinemaUQException e) {
+            Dialogos.error(e.getMessage());
+        }
+        refrescarAuditoria();
     }
 
     @FXML
@@ -326,15 +445,20 @@ public class AdminController {
             Dialogos.error("Seleccione una película.");
             return;
         }
-        cartelera.cambiarEstadoCartelera(pelicula, !pelicula.isEnCartelera());
-        lstPeliculasAdmin.refresh();
+        try {
+            cartelera.cambiarEstadoCartelera(pelicula, !pelicula.isEnCartelera());
+            lstPeliculasAdmin.refresh();
+        } catch (CinemaUQException e) {
+            Dialogos.error(e.getMessage());
+        }
+        refrescarAuditoria();
     }
 
     // ===================== Confitería =====================
 
     private void refrescarConfiteria() {
-        lstItems.setItems(FXCollections.observableArrayList(cine.getConfiteria().listarDisponibles()));
-        lstPromociones.setItems(FXCollections.observableArrayList(cine.getConfiteria().listarPromociones()));
+        lstItems.setItems(FXCollections.observableArrayList(cine.getConfiteria().listarTodos()));
+        lstPromociones.setItems(FXCollections.observableArrayList(cine.getPromociones().listarPromociones()));
     }
 
     /** RF-018: registrar producto de confitería. */
@@ -349,6 +473,65 @@ public class AdminController {
         } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
+    }
+
+    /** RF-018 con Composite: combo con los productos y/o combos seleccionados (Ctrl + clic). */
+    @FXML
+    private void onRegistrarCombo() {
+        List<ItemConfiteria> elegidos = new ArrayList<>(lstItems.getSelectionModel().getSelectedItems());
+        try {
+            String texto = txtDescuentoCombo.getText();
+            double descuento = texto == null || texto.isBlank() ? 0 : ClienteController.leerValor(texto);
+            cine.getConfiteria().registrarCombo(txtNombreCombo.getText(), descuento, elegidos);
+            txtNombreCombo.clear();
+            txtDescuentoCombo.clear();
+            refrescarConfiteria();
+        } catch (CinemaUQException e) {
+            Dialogos.error(e.getMessage());
+        }
+    }
+
+    /** RF-019 con Decorator: la promoción se aplicará al precio de las compras de las funciones que cubra. */
+    @FXML
+    private void onRegistrarPromocion() {
+        try {
+            double porcentaje = ClienteController.leerValor(txtPorcentajePromo.getText());
+            DayOfWeek dia = null;
+            for (DayOfWeek d : DayOfWeek.values()) {
+                if (nombreDia(d).equals(cmbDiaPromo.getValue())) {
+                    dia = d;
+                }
+            }
+            cine.getPromociones().registrarPromocion(txtNombrePromo.getText(), porcentaje, cmbAlcance.getValue(), dia,
+                    dpInicioPromo.getValue(), dpFinPromo.getValue());
+            txtNombrePromo.clear();
+            txtPorcentajePromo.clear();
+            refrescarConfiteria();
+        } catch (CinemaUQException e) {
+            Dialogos.error(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCambiarEstadoPromocion() {
+        Promocion promocion = lstPromociones.getSelectionModel().getSelectedItem();
+        if (promocion == null) {
+            Dialogos.error("Seleccione una promoción.");
+            return;
+        }
+        cine.getPromociones().cambiarEstado(promocion);
+        lstPromociones.refresh();
+    }
+
+    // ===================== Auditoría (Proxy) =====================
+
+    private void refrescarAuditoria() {
+        lstAuditoria.setItems(FXCollections.observableArrayList(cine.getAuditoria().listar()));
+    }
+
+    @FXML
+    private void onActualizarAuditoria() {
+        refrescarAuditoria();
     }
 
     // ===================== Estadísticas =====================

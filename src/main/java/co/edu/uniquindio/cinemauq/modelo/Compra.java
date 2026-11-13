@@ -22,6 +22,8 @@ public class Compra implements Identificable {
     private final List<Entrada> entradas;
     private final List<LineaConfiteria> lineas;
     private final int puntosRedimidos;
+    private final double valorAPagar;
+    private final List<String> detallePrecio;
     private LocalDateTime fecha;
     private EstadoCompra estado = EstadoCompra.PENDIENTE;
     private int puntosGanados;
@@ -29,13 +31,15 @@ public class Compra implements Identificable {
     private Reembolso reembolso;
 
     public Compra(String id, Cliente cliente, Funcion funcion, List<Entrada> entradas,
-                  List<LineaConfiteria> lineas, int puntosRedimidos) {
+                  List<LineaConfiteria> lineas, int puntosRedimidos, double valorAPagar, List<String> detallePrecio) {
         this.id = id;
         this.cliente = cliente;
         this.funcion = funcion;
         this.entradas = new ArrayList<>(entradas);
         this.lineas = new ArrayList<>(lineas);
         this.puntosRedimidos = puntosRedimidos;
+        this.valorAPagar = valorAPagar;
+        this.detallePrecio = List.copyOf(detallePrecio);
     }
 
     /** Valor de todo lo que se lleva el cliente, sin importar cómo lo paga. */
@@ -44,10 +48,17 @@ public class Compra implements Identificable {
                 + lineas.stream().mapToDouble(LineaConfiteria::getSubtotal).sum();
     }
 
-    /** Lo que se cobra en dinero: los ítems pagados con puntos no suman. */
+    /**
+     * Lo que se cobra en dinero: sin los ítems pagados con puntos y ya con las promociones
+     * aplicadas (lo calcula la cadena de decoradores de precio al construir la compra).
+     */
     public double getValorAPagar() {
-        return entradas.stream().filter(e -> !e.isPagadaConPuntos()).mapToDouble(Entrada::getPrecio).sum()
-                + lineas.stream().filter(l -> !l.isPagadaConPuntos()).mapToDouble(LineaConfiteria::getSubtotal).sum();
+        return valorAPagar;
+    }
+
+    /** Subtotales y descuentos aplicados, tal como se mostraron al cliente. */
+    public List<String> getDetallePrecio() {
+        return detallePrecio;
     }
 
     /** Congela lo que realmente se cobró: los reembolsos se calculan sobre este valor. */

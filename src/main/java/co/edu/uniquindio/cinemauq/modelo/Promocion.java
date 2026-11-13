@@ -1,33 +1,44 @@
 package co.edu.uniquindio.cinemauq.modelo;
 
+import co.edu.uniquindio.cinemauq.modelo.enums.AlcancePromocion;
 import co.edu.uniquindio.cinemauq.util.Formato;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 /**
- * Promoción que el administrador registra (p. ej. "Martes 2x1" o "-20 % en combos").
- * En esta entrega solo se gestiona; su aplicación sobre el precio se implementará
- * en la entrega de patrones estructurales/comportamiento.
+ * Promoción del cine: un porcentaje de descuento sobre las entradas o sobre la confitería,
+ * vigente entre dos fechas y, opcionalmente, solo un día de la semana ("Martes de cine").
+ * Se aplica al precio con el patrón Decorator (paquete precio).
  */
 public class Promocion implements Identificable {
 
     private final String id;
-    private String nombre;
-    private double porcentajeDescuento;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    private final String nombre;
+    private final double porcentajeDescuento;
+    private final AlcancePromocion alcance;
+    private final DayOfWeek dia;          // null = todos los días
+    private final LocalDate fechaInicio;
+    private final LocalDate fechaFin;
     private boolean activa = true;
 
-    public Promocion(String id, String nombre, double porcentajeDescuento, LocalDate fechaInicio, LocalDate fechaFin) {
+    public Promocion(String id, String nombre, double porcentajeDescuento, AlcancePromocion alcance, DayOfWeek dia,
+                     LocalDate fechaInicio, LocalDate fechaFin) {
         this.id = id;
         this.nombre = nombre;
         this.porcentajeDescuento = porcentajeDescuento;
+        this.alcance = alcance;
+        this.dia = dia;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
     }
 
-    public boolean estaVigente(LocalDate hoy) {
-        return activa && !hoy.isBefore(fechaInicio) && !hoy.isAfter(fechaFin);
+    /** ¿Aplica para una función de esa fecha? Se mira la fecha de la función, no la de la compra. */
+    public boolean aplicaPara(LocalDate fechaFuncion) {
+        return activa && !fechaFuncion.isBefore(fechaInicio) && !fechaFuncion.isAfter(fechaFin)
+                && (dia == null || fechaFuncion.getDayOfWeek() == dia);
     }
 
     @Override
@@ -41,6 +52,14 @@ public class Promocion implements Identificable {
 
     public double getPorcentajeDescuento() {
         return porcentajeDescuento;
+    }
+
+    public AlcancePromocion getAlcance() {
+        return alcance;
+    }
+
+    public DayOfWeek getDia() {
+        return dia;
     }
 
     public LocalDate getFechaInicio() {
@@ -61,7 +80,8 @@ public class Promocion implements Identificable {
 
     @Override
     public String toString() {
-        return nombre + " · -" + (int) porcentajeDescuento + "% · " + Formato.fecha(fechaInicio) + " a "
-                + Formato.fecha(fechaFin) + (activa ? "" : " (inactiva)");
+        String cuando = dia == null ? "todos los días" : "solo " + dia.getDisplayName(TextStyle.FULL, Locale.of("es", "CO"));
+        return nombre + " · -" + (int) porcentajeDescuento + "% en " + alcance.toString().toLowerCase() + " · " + cuando
+                + " · " + Formato.fecha(fechaInicio) + " a " + Formato.fecha(fechaFin) + (activa ? "" : " (inactiva)");
     }
 }

@@ -82,6 +82,15 @@
                         <Button maxWidth="Infinity" onAction="#onProgramarFuncion" styleClass="boton-principal" text="Programar"/>
                         <Label styleClass="ayuda" wrapText="true"
                                text="El sistema no permite cruces en una sala: cada función reserva su duración más 20 minutos de limpieza."/>
+                        <Label styleClass="subtitulo" text="Registrar sala"/>
+                        <TextField fx:id="txtNombreSala" promptText="Nombre, ej. Sala 4"/>
+                        <ComboBox fx:id="cmbTipoSala" maxWidth="Infinity" promptText="Tipo de sala"/>
+                        <HBox spacing="6.0">
+                            <TextField fx:id="txtFilas" promptText="Filas"/>
+                            <TextField fx:id="txtSillasFila" promptText="Sillas por fila"/>
+                            <TextField fx:id="txtFilasPreferenciales" promptText="Filas pref."/>
+                        </HBox>
+                        <Button maxWidth="Infinity" onAction="#onRegistrarSala" text="Registrar sala"/>
                     </VBox>
                 </HBox>
             </Tab>
@@ -103,30 +112,63 @@
                         <ComboBox fx:id="cmbClasificacion" maxWidth="Infinity" promptText="Clasificación"/>
                         <TextField fx:id="txtDuracion" promptText="Duración en minutos"/>
                         <TextArea fx:id="txtSinopsis" prefHeight="110.0" promptText="Sinopsis" wrapText="true"/>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarPelicula" styleClass="boton-principal" text="Registrar"/>
+                        <Button maxWidth="Infinity" onAction="#onRegistrarPelicula" styleClass="boton-principal" text="Registrar como nueva"/>
+                        <Button maxWidth="Infinity" onAction="#onActualizarPelicula" text="Guardar cambios a la seleccionada"/>
                     </VBox>
                 </HBox>
             </Tab>
-            <!-- ============ Confitería ============ -->
+            <!-- ============ Confitería y promociones ============ -->
             <Tab text="Confitería y promociones">
                 <HBox spacing="14.0">
                     <padding>
                         <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
                     </padding>
                     <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label styleClass="subtitulo" text="Productos y combos"/>
+                        <Label styleClass="subtitulo" text="Productos y combos (Ctrl + clic para elegir varios)"/>
                         <ListView fx:id="lstItems" VBox.vgrow="ALWAYS"/>
-                        <Label styleClass="subtitulo" text="Promociones"/>
-                        <ListView fx:id="lstPromociones" prefHeight="120.0"/>
+                        <Label styleClass="subtitulo" text="Estructura del ítem seleccionado"/>
+                        <TextArea fx:id="txtDetalleItem" editable="false" prefHeight="150.0"/>
                     </VBox>
-                    <VBox prefWidth="320.0" spacing="8.0">
+                    <VBox prefWidth="330.0" spacing="8.0">
                         <Label styleClass="subtitulo" text="Registrar producto"/>
                         <TextField fx:id="txtNombreProducto" promptText="Nombre"/>
                         <TextField fx:id="txtPrecioProducto" promptText="Precio, ej. 9000"/>
                         <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" promptText="Categoría"/>
-                        <Button maxWidth="Infinity" onAction="#onRegistrarProducto" styleClass="boton-principal" text="Registrar"/>
+                        <Button maxWidth="Infinity" onAction="#onRegistrarProducto" styleClass="boton-principal" text="Registrar producto"/>
+                        <Label styleClass="subtitulo" text="Crear combo con lo seleccionado"/>
+                        <TextField fx:id="txtNombreCombo" promptText="Nombre del combo"/>
+                        <TextField fx:id="txtDescuentoCombo" promptText="Descuento %, de 0 a 50"/>
+                        <Button maxWidth="Infinity" onAction="#onRegistrarCombo" styleClass="boton-principal" text="Crear combo"/>
+                        <Label styleClass="ayuda" wrapText="true" text="Un combo puede incluir productos y también otros combos."/>
+                    </VBox>
+                    <VBox prefWidth="360.0" spacing="8.0">
+                        <Label styleClass="subtitulo" text="Promociones"/>
+                        <ListView fx:id="lstPromociones" VBox.vgrow="ALWAYS"/>
+                        <Button maxWidth="Infinity" onAction="#onCambiarEstadoPromocion" text="Activar / desactivar"/>
+                        <TextField fx:id="txtNombrePromo" promptText="Nombre de la promoción"/>
+                        <HBox spacing="6.0">
+                            <TextField fx:id="txtPorcentajePromo" promptText="Descuento (%)"/>
+                            <ComboBox fx:id="cmbAlcance" promptText="Aplica a"/>
+                        </HBox>
+                        <ComboBox fx:id="cmbDiaPromo" maxWidth="Infinity"/>
+                        <HBox spacing="6.0">
+                            <DatePicker fx:id="dpInicioPromo" promptText="Desde"/>
+                            <DatePicker fx:id="dpFinPromo" promptText="Hasta"/>
+                        </HBox>
+                        <Button maxWidth="Infinity" onAction="#onRegistrarPromocion" styleClass="boton-principal" text="Registrar promoción"/>
                     </VBox>
                 </HBox>
+            </Tab>
+            <!-- ============ Auditoría ============ -->
+            <Tab text="Auditoría">
+                <VBox spacing="8.0">
+                    <padding>
+                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
+                    </padding>
+                    <Label styleClass="subtitulo" text="Operaciones de administración sobre la cartelera (registradas por el proxy)"/>
+                    <Button onAction="#onActualizarAuditoria" text="Actualizar"/>
+                    <ListView fx:id="lstAuditoria" VBox.vgrow="ALWAYS"/>
+                </VBox>
             </Tab>
             <!-- ============ Estadísticas ============ -->
             <Tab text="Estadísticas">

@@ -36,7 +36,7 @@
                     <padding>
                         <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
                     </padding>
-                    <VBox prefWidth="290.0" spacing="8.0">
+                    <VBox prefWidth="340.0" spacing="8.0">
                         <Label styleClass="subtitulo" text="1. Películas en cartelera"/>
                         <ListView fx:id="lstPeliculas" prefHeight="220.0"/>
                         <Label fx:id="lblSinopsis" styleClass="ayuda" wrapText="true"/>
@@ -45,7 +45,7 @@
                     </VBox>
                     <VBox spacing="8.0" HBox.hgrow="ALWAYS">
                         <Label styleClass="subtitulo" text="3. Elija sus sillas"/>
-                        <Label styleClass="ayuda" text="Gris: general · Dorado: preferencial (+30 %) · Verde: elegida · Rojo: vendida"/>
+                        <Label styleClass="ayuda" text="Claro: general · Dorado: preferencial (+30 %) · Verde: elegida · Gris oscuro: vendida"/>
                         <Label maxWidth="Infinity" styleClass="pantalla-cine" text="PANTALLA"/>
                         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
                             <GridPane fx:id="gridAsientos" hgap="4.0" vgap="4.0">

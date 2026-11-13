@@ -1,6 +1,7 @@
 package co.edu.uniquindio.cinemauq.contexto;
 
 import co.edu.uniquindio.cinemauq.datos.DatosIniciales;
+import co.edu.uniquindio.cinemauq.fachada.TaquillaFacade;
 import co.edu.uniquindio.cinemauq.fabrica.CatalogoFabricasEntrada;
 import co.edu.uniquindio.cinemauq.modelo.Compra;
 import co.edu.uniquindio.cinemauq.modelo.Funcion;
@@ -10,9 +11,12 @@ import co.edu.uniquindio.cinemauq.modelo.Promocion;
 import co.edu.uniquindio.cinemauq.modelo.Sala;
 import co.edu.uniquindio.cinemauq.modelo.SolicitudRecarga;
 import co.edu.uniquindio.cinemauq.modelo.Usuario;
+import co.edu.uniquindio.cinemauq.proxy.Auditoria;
+import co.edu.uniquindio.cinemauq.proxy.GestionCarteleraProxy;
 import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
 import co.edu.uniquindio.cinemauq.repositorio.RepositorioMemoria;
 import co.edu.uniquindio.cinemauq.servicio.EquivalenciaPuntos;
+import co.edu.uniquindio.cinemauq.servicio.GestionCartelera;
 import co.edu.uniquindio.cinemauq.servicio.PoliticaCancelacion;
 import co.edu.uniquindio.cinemauq.servicio.ReglaPorValorGastado;
 import co.edu.uniquindio.cinemauq.servicio.ServicioAutenticacion;
@@ -20,6 +24,7 @@ import co.edu.uniquindio.cinemauq.servicio.ServicioCartelera;
 import co.edu.uniquindio.cinemauq.servicio.ServicioCompras;
 import co.edu.uniquindio.cinemauq.servicio.ServicioConfiteria;
 import co.edu.uniquindio.cinemauq.servicio.ServicioEstadisticas;
+import co.edu.uniquindio.cinemauq.servicio.ServicioPromociones;
 import co.edu.uniquindio.cinemauq.servicio.ServicioPuntos;
 import co.edu.uniquindio.cinemauq.servicio.ServicioTarjeta;
 import co.edu.uniquindio.cinemauq.util.Reloj;
@@ -44,6 +49,10 @@ public final class CinemaUQ {
     private final ServicioCompras compras;
     private final ServicioPuntos puntos;
     private final ServicioEstadisticas estadisticas;
+    private final ServicioPromociones promociones;
+    private final TaquillaFacade taquilla;
+    private final Auditoria auditoria = new Auditoria();
+    private final GestionCartelera gestionCartelera;
     private final Reloj reloj;
 
     /** Constructor privado: nadie fuera de la clase puede hacer new CinemaUQ(). */
@@ -61,12 +70,15 @@ public final class CinemaUQ {
         EquivalenciaPuntos equivalencia = new EquivalenciaPuntos(100);
         autenticacion = new ServicioAutenticacion(usuarios);
         cartelera = new ServicioCartelera(peliculas, salas, funciones, reloj);
-        confiteria = new ServicioConfiteria(items, promociones);
+        confiteria = new ServicioConfiteria(items);
+        this.promociones = new ServicioPromociones(promociones);
         tarjetas = new ServicioTarjeta(solicitudes, reloj);
         compras = new ServicioCompras(repoCompras, new CatalogoFabricasEntrada(), new ReglaPorValorGastado(1000),
-                equivalencia, new PoliticaCancelacion(), reloj);
+                equivalencia, new PoliticaCancelacion(), this.promociones, reloj);
         puntos = new ServicioPuntos(equivalencia, reloj);
         estadisticas = new ServicioEstadisticas(repoCompras::listar, funciones::listar);
+        taquilla = new TaquillaFacade(compras, puntos);                                   // Facade
+        gestionCartelera = new GestionCarteleraProxy(cartelera, sesion, auditoria, reloj); // Proxy
 
         DatosIniciales.cargar(this);
     }
@@ -109,6 +121,24 @@ public final class CinemaUQ {
 
     public ServicioEstadisticas getEstadisticas() {
         return estadisticas;
+    }
+
+    public ServicioPromociones getPromociones() {
+        return promociones;
+    }
+
+    /** Facade para la pantalla del cliente. */
+    public TaquillaFacade getTaquilla() {
+        return taquilla;
+    }
+
+    /** Gestión de cartelera protegida por el Proxy (lo que usa la pantalla del administrador). */
+    public GestionCartelera getGestionCartelera() {
+        return gestionCartelera;
+    }
+
+    public Auditoria getAuditoria() {
+        return auditoria;
     }
 
     public Reloj getReloj() {
