@@ -2,6 +2,7 @@ package co.edu.uniquindio.cinemauq.datos;
 
 import co.edu.uniquindio.cinemauq.builder.CompraBuilder;
 import co.edu.uniquindio.cinemauq.contexto.CinemaUQ;
+import co.edu.uniquindio.cinemauq.util.RelojAjustable;
 import co.edu.uniquindio.cinemauq.excepciones.CinemaUQException;
 import co.edu.uniquindio.cinemauq.modelo.Administrador;
 import co.edu.uniquindio.cinemauq.modelo.Asiento;
@@ -27,33 +28,41 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Datos de demostración. Se crean a través de los servicios (no con new directo),
  * así también pasan por las validaciones de negocio. Las fechas se calculan desde
  * "hoy" para que siempre haya funciones futuras al abrir la aplicación.
+ * Antes de los datos de hoy se simulan 21 días de operación (HistorialSimulado) para que
+ * las estadísticas, los reportes y los gráficos tengan datos.
  *
  * Usuarios de prueba (contraseña):
  *   admin@cinemauq.com  (admin123)  administrador
  *   laura@correo.com    (123456)    cliente con saldo, compras y puntos
  *   carlos@correo.com   (123456)    cliente con poco saldo y una solicitud de recarga
  *   sofia@correo.com    (123456)    cliente con la tarjeta bloqueada
+ *   andres@, valentina@, juanpablo@, mariana@, santiago@, daniela@, felipe@, isabela@,
+ *   tomas@, camila@, miguel@correo.com (123456)  clientes del historial de ventas
  */
 public final class DatosIniciales {
 
     private DatosIniciales() {
     }
 
-    public static void cargar(CinemaUQ cine) {
+    /** Días de operación que se simulan antes de hoy. */
+    public static final int DIAS_HISTORIAL = 21;
+
+    public static void cargar(CinemaUQ cine, RelojAjustable reloj) {
         try {
-            cargarDatos(cine);
+            cargarDatos(cine, reloj);
         } catch (CinemaUQException e) {
             throw new IllegalStateException("No se pudieron cargar los datos iniciales: " + e.getMessage(), e);
         }
     }
 
-    private static void cargarDatos(CinemaUQ cine) throws CinemaUQException {
+    private static void cargarDatos(CinemaUQ cine, RelojAjustable reloj) throws CinemaUQException {
         ServicioCartelera cartelera = cine.getCartelera();
         ServicioConfiteria confiteria = cine.getConfiteria();
         ServicioTarjeta tarjetas = cine.getTarjetas();
@@ -68,16 +77,15 @@ public final class DatosIniciales {
         Cliente carlos = cine.getAutenticacion().registrarCliente("Carlos Ruiz", "1094000002", "carlos@correo.com", "123456");
         Cliente sofia = cine.getAutenticacion().registrarCliente("Sofía Herrera", "1094000003", "sofia@correo.com", "123456");
 
-        tarjetas.recargar(admin, laura, 300_000);
-        tarjetas.recargar(admin, carlos, 30_000);
-        tarjetas.recargar(admin, sofia, 40_000);
-        tarjetas.bloquearTarjeta(admin, sofia);
-        tarjetas.solicitarRecarga(carlos, 50_000);
-
-        // Puntos de compras anteriores: uno vencido, uno por vencer y uno reciente (ejemplo del enunciado)
-        laura.getCuentaPuntos().acumular(200, hoy.minusMonths(13), "Compras de hace 13 meses (vencidos)");
-        laura.getCuentaPuntos().acumular(300, hoy.minusMonths(11).minusDays(10), "Compras de hace 11 meses");
-        laura.getCuentaPuntos().acumular(500, hoy.minusMonths(2), "Compras de hace 2 meses");
+        String[][] otros = {{"Andrés Mejía", "andres"}, {"Valentina Ríos", "valentina"}, {"Juan Pablo Cárdenas", "juanpablo"},
+                {"Mariana López", "mariana"}, {"Santiago Restrepo", "santiago"}, {"Daniela Ospina", "daniela"},
+                {"Felipe Arango", "felipe"}, {"Isabela Montoya", "isabela"}, {"Tomás Giraldo", "tomas"},
+                {"Camila Franco", "camila"}, {"Miguel Ángel Duque", "miguel"}};
+        List<Cliente> historial = new ArrayList<>(List.of(laura));
+        for (int i = 0; i < otros.length; i++) {
+            historial.add(cine.getAutenticacion().registrarCliente(otros[i][0], String.valueOf(1094000010L + i),
+                    otros[i][1] + "@correo.com", "123456"));
+        }
 
         // ---------- Películas ----------
         Pelicula ecos = cartelera.registrarPelicula("Ecos del Quindío", Genero.DRAMA, Clasificacion.MAYORES_12, 118,
@@ -98,6 +106,43 @@ public final class DatosIniciales {
         Sala sala1 = cartelera.registrarSala("Sala 1", TipoSala.DOS_D, 8, 12, 2);
         Sala sala2 = cartelera.registrarSala("Sala 2", TipoSala.TRES_D, 7, 10, 2);
         Sala vip = cartelera.registrarSala("Sala VIP", TipoSala.VIP, 5, 8, 5);
+
+        // ---------- Confitería ----------
+        Producto crispetasM = confiteria.registrarProducto("Crispetas medianas", 12_000, CategoriaProducto.CRISPETAS);
+        Producto crispetasG = confiteria.registrarProducto("Crispetas grandes", 16_000, CategoriaProducto.CRISPETAS);
+        Producto gaseosa = confiteria.registrarProducto("Gaseosa 500 ml", 7_000, CategoriaProducto.BEBIDA);
+        confiteria.registrarProducto("Agua 600 ml", 4_500, CategoriaProducto.BEBIDA);
+        confiteria.registrarProducto("Perro caliente", 12_000, CategoriaProducto.SNACK);
+        Producto nachos = confiteria.registrarProducto("Nachos con queso", 14_000, CategoriaProducto.SNACK);
+        confiteria.registrarProducto("Chocolatina", 4_000, CategoriaProducto.DULCE);
+        Combo individual = confiteria.registrarCombo("Combo Individual", 10, List.of(crispetasM, gaseosa));
+        Combo pareja = confiteria.registrarCombo("Combo Pareja", 10, List.of(crispetasG, gaseosa, gaseosa));
+        Combo familiar = confiteria.registrarCombo("Combo Familiar", 15, List.of(crispetasG, crispetasG, gaseosa, gaseosa, gaseosa, gaseosa, nachos));
+        // Composite: un combo que contiene otro combo
+        Combo mega = confiteria.registrarCombo("Combo Mega Pareja", 5, List.<ItemConfiteria>of(pareja, nachos));
+
+        // Decorator: estas promociones se apilan sobre el precio de la compra
+        cine.getPromociones().registrarPromocion("Martes de cine", 50, AlcancePromocion.ENTRADAS, DayOfWeek.TUESDAY,
+                hoy.minusDays(30), hoy.plusMonths(3));
+        cine.getPromociones().registrarPromocion("Confitería UQ", 15, AlcancePromocion.CONFITERIA, null,
+                hoy.minusDays(30), hoy.plusMonths(3));
+
+        // ---------- Historial: 21 días de operación simulados con los servicios reales ----------
+        List<ItemConfiteria> vendibles = List.of(crispetasM, crispetasG, gaseosa, nachos, individual, pareja, familiar, mega);
+        new HistorialSimulado(reloj, cartelera, compras, tarjetas, admin, historial,
+                List.of(ecos, galaxia, risas, bosque, gigantes), List.of(sala1, sala2, vip), vendibles)
+                .generar(hoy, DIAS_HISTORIAL);
+
+        // ---------- Datos de hoy (hora real) ----------
+        tarjetas.recargar(admin, laura, 300_000);
+        tarjetas.recargar(admin, carlos, 30_000);
+        tarjetas.recargar(admin, sofia, 40_000);
+        tarjetas.bloquearTarjeta(admin, sofia);
+        tarjetas.solicitarRecarga(carlos, 50_000);
+        // Puntos de compras anteriores: uno vencido, uno por vencer y uno reciente (ejemplo del enunciado)
+        laura.getCuentaPuntos().acumular(200, hoy.minusMonths(13), "Compras de hace 13 meses (vencidos)");
+        laura.getCuentaPuntos().acumular(300, hoy.minusMonths(11).minusDays(10), "Compras de hace 11 meses");
+        laura.getCuentaPuntos().acumular(500, hoy.minusMonths(2), "Compras de hace 2 meses");
 
         // ---------- Funciones ----------
         LocalDate d1 = hoy.plusDays(1);
@@ -121,26 +166,6 @@ public final class DatosIniciales {
         cartelera.programarFuncion(galaxia, sala1, d3.atTime(17, 0), 15_000);
         // Prototype: la función de las 19:30 se repite igual tres días después
         cartelera.duplicarFuncion(galaxiaD1, d1.plusDays(3).atTime(LocalTime.of(19, 30)));
-
-        // ---------- Confitería ----------
-        Producto crispetasM = confiteria.registrarProducto("Crispetas medianas", 12_000, CategoriaProducto.CRISPETAS);
-        Producto crispetasG = confiteria.registrarProducto("Crispetas grandes", 16_000, CategoriaProducto.CRISPETAS);
-        Producto gaseosa = confiteria.registrarProducto("Gaseosa 500 ml", 7_000, CategoriaProducto.BEBIDA);
-        confiteria.registrarProducto("Agua 600 ml", 4_500, CategoriaProducto.BEBIDA);
-        confiteria.registrarProducto("Perro caliente", 12_000, CategoriaProducto.SNACK);
-        Producto nachos = confiteria.registrarProducto("Nachos con queso", 14_000, CategoriaProducto.SNACK);
-        confiteria.registrarProducto("Chocolatina", 4_000, CategoriaProducto.DULCE);
-        Combo individual = confiteria.registrarCombo("Combo Individual", 10, List.of(crispetasM, gaseosa));
-        Combo pareja = confiteria.registrarCombo("Combo Pareja", 10, List.of(crispetasG, gaseosa, gaseosa));
-        confiteria.registrarCombo("Combo Familiar", 15, List.of(crispetasG, crispetasG, gaseosa, gaseosa, gaseosa, gaseosa, nachos));
-        // Composite: un combo que contiene otro combo
-        confiteria.registrarCombo("Combo Mega Pareja", 5, List.<ItemConfiteria>of(pareja, nachos));
-
-        // Decorator: estas promociones se apilan sobre el precio de la compra
-        cine.getPromociones().registrarPromocion("Martes de cine", 50, AlcancePromocion.ENTRADAS, DayOfWeek.TUESDAY,
-                hoy, hoy.plusMonths(3));
-        cine.getPromociones().registrarPromocion("Confitería UQ", 15, AlcancePromocion.CONFITERIA, null,
-                hoy, hoy.plusMonths(3));
 
         // ---------- Compras de ejemplo (pasan por el Builder y el pago real) ----------
         pagar(compras, compras.nuevaCompra(laura, ecosD1)

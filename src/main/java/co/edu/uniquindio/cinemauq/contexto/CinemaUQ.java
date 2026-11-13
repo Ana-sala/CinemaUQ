@@ -32,6 +32,7 @@ import co.edu.uniquindio.cinemauq.servicio.ServicioPromociones;
 import co.edu.uniquindio.cinemauq.servicio.ServicioPuntos;
 import co.edu.uniquindio.cinemauq.servicio.ServicioTarjeta;
 import co.edu.uniquindio.cinemauq.util.Reloj;
+import co.edu.uniquindio.cinemauq.util.RelojAjustable;
 import co.edu.uniquindio.cinemauq.util.RelojSistema;
 
 /**
@@ -60,11 +61,11 @@ public final class CinemaUQ {
     private final GestionCartelera gestionCartelera;
     private final NotificadorCliente notificador = new NotificadorCliente();          // Observer
     private final MonitorOcupacion monitorOcupacion = new MonitorOcupacion(80);       // Observer
-    private final Reloj reloj;
+    private final RelojAjustable reloj;   // hora real; DatosIniciales lo mueve al pasado para el historial
 
     /** Constructor privado: nadie fuera de la clase puede hacer new CinemaUQ(). */
     private CinemaUQ() {
-        reloj = new RelojSistema();
+        reloj = new RelojAjustable(new RelojSistema());
         Repositorio<Usuario> usuarios = new RepositorioMemoria<>();
         Repositorio<Pelicula> peliculas = new RepositorioMemoria<>();
         Repositorio<Sala> salas = new RepositorioMemoria<>();
@@ -91,7 +92,7 @@ public final class CinemaUQ {
         compras.agregarObservador(notificador);                                           // Observer
         compras.agregarObservador(monitorOcupacion);
 
-        DatosIniciales.cargar(this);
+        DatosIniciales.cargar(this, reloj);
     }
 
     /** Punto de acceso global. Crea la instancia la primera vez (inicialización perezosa). */
