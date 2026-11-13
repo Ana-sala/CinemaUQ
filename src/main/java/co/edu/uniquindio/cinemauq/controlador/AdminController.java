@@ -138,8 +138,6 @@ public class AdminController {
     @FXML
     private ListView<RegistroAuditoria> lstAuditoria;
     // --- Estadísticas ---
-    @FXML
-    private TextArea txtEstadisticas;
 
     @FXML
     private void initialize() {
@@ -169,7 +167,6 @@ public class AdminController {
         refrescarFunciones();
         refrescarPeliculas();
         refrescarConfiteria();
-        onActualizarEstadisticas();
         refrescarAuditoria();
     }
 
@@ -343,8 +340,7 @@ public class AdminController {
             Dialogos.info("Función cancelada", reembolsos.size() + " compras reembolsadas por " + Formato.moneda(total) + ".");
             refrescarFunciones();
             refrescarClientes();
-            onActualizarEstadisticas();
-        } catch (CinemaUQException e) {
+            } catch (CinemaUQException e) {
             Dialogos.error(e.getMessage());
         }
     }
@@ -534,13 +530,7 @@ public class AdminController {
         refrescarAuditoria();
     }
 
-    // ===================== Estadísticas =====================
-
-    /** RF-024: estadísticas básicas. */
-    @FXML
-    private void onActualizarEstadisticas() {
-        txtEstadisticas.setText(cine.getEstadisticas().resumen());
-    }
+    // Las estadísticas y los reportes tienen su propio controlador: ReportesController.
 
     @FXML
     private void onCerrarSesion() {

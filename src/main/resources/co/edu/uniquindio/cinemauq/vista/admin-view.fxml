@@ -170,15 +170,9 @@
                     <ListView fx:id="lstAuditoria" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </Tab>
-            <!-- ============ Estadísticas ============ -->
-            <Tab text="Estadísticas">
-                <VBox spacing="8.0">
-                    <padding>
-                        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0"/>
-                    </padding>
-                    <Button onAction="#onActualizarEstadisticas" text="Actualizar"/>
-                    <TextArea fx:id="txtEstadisticas" editable="false" VBox.vgrow="ALWAYS"/>
-                </VBox>
+            <!-- ============ Reportes y estadísticas (vista y controlador propios) ============ -->
+            <Tab text="Reportes y estadísticas">
+                <fx:include source="reportes-view.fxml"/>
             </Tab>
         </TabPane>
     </center>

@@ -97,3 +97,83 @@
     -fx-font-weight: bold;
     -fx-text-fill: #7b1e2b;
 }
+/* ===================== Reportes y estadísticas (entrega 3) ===================== */
+.indicador {
+    -fx-background-color: white;
+    -fx-border-color: #d4a017;
+    -fx-border-width: 0 0 0 4;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 12 16 12 14;
+    -fx-min-width: 200;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, 2);
+}
+
+.indicador-valor {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7b1e2b;
+}
+
+.indicador-nombre {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b5b5e;
+}
+
+.vista-previa {
+    -fx-font-family: "Consolas", "Monospaced";
+    -fx-font-size: 12px;
+}
+
+.chart-title {
+    -fx-text-fill: #7b1e2b;
+    -fx-font-weight: bold;
+}
+
+.default-color0.chart-bar {
+    -fx-bar-fill: #7b1e2b;
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #7b1e2b;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #7b1e2b, white;
+}
+
+.default-color1.chart-series-line {
+    -fx-stroke: #d4a017;
+}
+
+.default-color1.chart-line-symbol {
+    -fx-background-color: #d4a017, white;
+}
+
+.default-color0.chart-pie {
+    -fx-pie-color: #7b1e2b;
+}
+
+.default-color1.chart-pie {
+    -fx-pie-color: #d4a017;
+}
+
+.default-color2.chart-pie {
+    -fx-pie-color: #a0522d;
+}
+
+.default-color3.chart-pie {
+    -fx-pie-color: #2e9e5b;
+}
+
+.default-color4.chart-pie {
+    -fx-pie-color: #5b6c8f;
+}
+
+.default-color5.chart-pie {
+    -fx-pie-color: #c97b84;
+}
+
+.default-color6.chart-pie {
+    -fx-pie-color: #8c7b6b;
+}
