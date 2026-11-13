@@ -60,6 +60,11 @@ public class TaquillaFacade {
         return compras.cancelarCompra(cliente, compra);
     }
 
+    /** Cuánto se le devolvería al cliente si cancela ahora (lo calcula la política de reembolso). */
+    public int porcentajeSiCancela(Compra compra) throws CinemaUQException {
+        return compras.porcentajeSiCancela(compra);
+    }
+
     public List<Compra> historial(Cliente cliente) {
         return compras.historialDe(cliente);
     }

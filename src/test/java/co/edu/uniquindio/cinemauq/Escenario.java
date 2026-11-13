@@ -28,7 +28,7 @@ class Escenario {
     final ServicioPromociones promociones = new ServicioPromociones(new RepositorioMemoria<>());
     final ServicioTarjeta tarjetas = new ServicioTarjeta(new RepositorioMemoria<>(), reloj);
     final ServicioCompras servicioCompras = new ServicioCompras(compras, new CatalogoFabricasEntrada(),
-            new ReglaPorValorGastado(1000), new EquivalenciaPuntos(100), new PoliticaCancelacion(), promociones, reloj);
+            new ReglaPorValorGastado(1000), new EquivalenciaPuntos(100), new PoliticaPorAnticipacion(), new PoliticaReembolsoTotal(), promociones, reloj);
 
     final Administrador admin;
     final Cliente cliente;

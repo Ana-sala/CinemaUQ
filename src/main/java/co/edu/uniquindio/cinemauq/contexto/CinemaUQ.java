@@ -17,7 +17,8 @@ import co.edu.uniquindio.cinemauq.repositorio.Repositorio;
 import co.edu.uniquindio.cinemauq.repositorio.RepositorioMemoria;
 import co.edu.uniquindio.cinemauq.servicio.EquivalenciaPuntos;
 import co.edu.uniquindio.cinemauq.servicio.GestionCartelera;
-import co.edu.uniquindio.cinemauq.servicio.PoliticaCancelacion;
+import co.edu.uniquindio.cinemauq.servicio.PoliticaPorAnticipacion;
+import co.edu.uniquindio.cinemauq.servicio.PoliticaReembolsoTotal;
 import co.edu.uniquindio.cinemauq.servicio.ReglaPorValorGastado;
 import co.edu.uniquindio.cinemauq.servicio.ServicioAutenticacion;
 import co.edu.uniquindio.cinemauq.servicio.ServicioCartelera;
@@ -74,7 +75,8 @@ public final class CinemaUQ {
         this.promociones = new ServicioPromociones(promociones);
         tarjetas = new ServicioTarjeta(solicitudes, reloj);
         compras = new ServicioCompras(repoCompras, new CatalogoFabricasEntrada(), new ReglaPorValorGastado(1000),
-                equivalencia, new PoliticaCancelacion(), this.promociones, reloj);
+                equivalencia, new PoliticaPorAnticipacion(), new PoliticaReembolsoTotal(),   // Strategy
+                this.promociones, reloj);
         puntos = new ServicioPuntos(equivalencia, reloj);
         estadisticas = new ServicioEstadisticas(repoCompras::listar, funciones::listar);
         taquilla = new TaquillaFacade(compras, puntos);                                   // Facade

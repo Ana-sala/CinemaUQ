@@ -319,7 +319,7 @@ public class ClienteController {
         txtDetalleCompra.setText(sb.toString());
     }
 
-    /** RF-012: cancelación con la política de tiempo. */
+    /** RF-012: cancelación; antes de confirmar se muestra el porcentaje que calcula la política (Strategy). */
     @FXML
     private void onCancelarCompra() {
         Compra compra = lstCompras.getSelectionModel().getSelectedItem();
@@ -327,11 +327,14 @@ public class ClienteController {
             Dialogos.error("Seleccione la compra que desea cancelar.");
             return;
         }
-        if (!Dialogos.confirmar("¿Cancelar la compra " + compra.getId() + "?",
-                "Más de 24 h antes: se devuelve el 100 %. Entre 2 y 24 h: el 80 %. Con menos de 2 h no se puede cancelar.")) {
-            return;
-        }
         try {
+            int porcentaje = taquilla.porcentajeSiCancela(compra);          // Strategy: lo decide la política
+            double valor = Math.round(compra.getValorPagado() * porcentaje / 100.0);
+            if (!Dialogos.confirmar("¿Cancelar la compra " + compra.getId() + "?",
+                    "Se le devolverá el " + porcentaje + " % (" + Formato.moneda(valor) + ") a su tarjeta virtual.\n"
+                            + cine.getCompras().getPoliticaCliente().descripcion())) {
+                return;
+            }
             Reembolso reembolso = taquilla.cancelar(cliente, compra);
             Dialogos.info("Compra cancelada", "Se devolvieron " + Formato.moneda(reembolso.getValor()) + " ("
                     + reembolso.getPorcentaje() + "%) a su tarjeta virtual.");

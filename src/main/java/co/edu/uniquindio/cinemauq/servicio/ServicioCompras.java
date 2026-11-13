@@ -41,18 +41,21 @@ public class ServicioCompras {
     private final CatalogoFabricasEntrada fabricas;
     private final ReglaAcumulacionPuntos reglaPuntos;
     private final EquivalenciaPuntos equivalencia;
-    private final PoliticaCancelacion politica;
+    private final PoliticaReembolso politicaCliente;   // Strategy: cuando cancela el cliente
+    private final PoliticaReembolso politicaCine;      // Strategy: cuando el cine cancela la función
     private final FuentePromociones promociones;
     private final Reloj reloj;
 
     public ServicioCompras(Repositorio<Compra> compras, CatalogoFabricasEntrada fabricas,
                            ReglaAcumulacionPuntos reglaPuntos, EquivalenciaPuntos equivalencia,
-                           PoliticaCancelacion politica, FuentePromociones promociones, Reloj reloj) {
+                           PoliticaReembolso politicaCliente, PoliticaReembolso politicaCine,
+                           FuentePromociones promociones, Reloj reloj) {
         this.compras = compras;
         this.fabricas = fabricas;
         this.reglaPuntos = reglaPuntos;
         this.equivalencia = equivalencia;
-        this.politica = politica;
+        this.politicaCliente = politicaCliente;
+        this.politicaCine = politicaCine;
         this.promociones = promociones;
         this.reloj = reloj;
     }
@@ -118,7 +121,7 @@ public class ServicioCompras {
         return compra;
     }
 
-    /** RF-012: el cliente cancela según la política de tiempo (RN-04). */
+    /** RF-012: el cliente cancela; el porcentaje lo decide la estrategia del cliente (RN-04). */
     public Reembolso cancelarCompra(Cliente solicitante, Compra compra) throws CinemaUQException {
         if (!compra.getCliente().equals(solicitante)) {
             throw new OperacionNoAutorizadaException("Solo el dueño de la compra puede cancelarla.");
@@ -126,11 +129,22 @@ public class ServicioCompras {
         if (compra.getEstado() != EstadoCompra.PAGADA) {
             throw new CancelacionNoPermitidaException("Solo se cancelan compras pagadas; esta está " + compra.getEstado() + ".");
         }
-        int porcentaje = politica.porcentajeReembolso(compra.getFuncion().getFechaHora(), reloj.ahora());
-        return reembolsar(compra, porcentaje, MotivoReembolso.CANCELACION_CLIENTE);
+        return reembolsar(compra, politicaCliente);
     }
 
-    /** RF-021: el cine cancela la función y devuelve el 100 % a cada compra pagada. */
+    /**
+     * Porcentaje que recibiría el cliente si cancela ahora, para mostrarlo antes de confirmar.
+     * @throws CancelacionNoPermitidaException si ya no se puede cancelar
+     */
+    public int porcentajeSiCancela(Compra compra) throws CancelacionNoPermitidaException {
+        return politicaCliente.porcentajeReembolso(compra.getFuncion().getFechaHora(), reloj.ahora());
+    }
+
+    public PoliticaReembolso getPoliticaCliente() {
+        return politicaCliente;
+    }
+
+    /** RF-021: el cine cancela la función; cada compra pagada se reembolsa con la estrategia del cine. */
     public List<Reembolso> cancelarFuncion(Usuario operador, Funcion funcion) throws CinemaUQException {
         if (operador == null || operador.getRol() != Rol.ADMINISTRADOR) {
             throw new OperacionNoAutorizadaException("Solo un administrador puede cancelar funciones.");
@@ -139,17 +153,20 @@ public class ServicioCompras {
         List<Reembolso> reembolsos = new ArrayList<>();
         for (Compra compra : comprasDe(funcion)) {
             if (compra.getEstado() == EstadoCompra.PAGADA) {
-                reembolsos.add(reembolsar(compra, 100, MotivoReembolso.FUNCION_CANCELADA));
+                reembolsos.add(reembolsar(compra, politicaCine));
             }
         }
         return reembolsos;
     }
 
-    private Reembolso reembolsar(Compra compra, int porcentaje, MotivoReembolso motivo) throws CinemaUQException {
+    /** Aplica la estrategia recibida: el método no cambia aunque se agreguen políticas nuevas. */
+    private Reembolso reembolsar(Compra compra, PoliticaReembolso politica) throws CinemaUQException {
         if (compra.isReembolsada()) {
             throw new ReembolsoDuplicadoException("La compra " + compra.getId() + " ya fue reembolsada.");
         }
         LocalDateTime ahora = reloj.ahora();
+        int porcentaje = politica.porcentajeReembolso(compra.getFuncion().getFechaHora(), ahora);
+        MotivoReembolso motivo = politica.motivo();
         Cliente cliente = compra.getCliente();
         double valor = Math.round(compra.getValorPagado() * porcentaje / 100.0);
         Reembolso reembolso = new Reembolso(compra.getId(), ahora, porcentaje, valor, compra.getPuntosRedimidos(), motivo);
